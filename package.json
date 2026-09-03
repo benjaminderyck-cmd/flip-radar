@@ -1,0 +1,18 @@
+{
+  "name": "flip-radar-foundation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "start": "node src/server.mjs",
+    "migrate": "node scripts/migrate.mjs",
+    "seed": "node scripts/import-sources.mjs",
+    "build:workflows": "node scripts/build-workflows.mjs",
+    "test": "node --test --test-concurrency=1 test/*.test.mjs",
+    "self-test": "node scripts/self-test.mjs",
+    "check": "node scripts/check-package.mjs"
+  },
+  "dependencies": {"pg": "8.23.0", "playwright": "1.62.1"},
+  "devDependencies": {"@electric-sql/pglite": "0.5.8"}
+}

@@ -1,0 +1,33 @@
+{
+  "request_key": "REPLACE_WITH_UNIQUE_REVIEW_KEY",
+  "listing_id": "REPLACE_WITH_EXISTING_LISTING_UUID",
+  "listing_updates": {
+    "product_key": "REPLACE_WITH_VERIFIED_EXACT_MODEL",
+    "condition_key": "REPLACE_WITH_VERIFIED_CONDITION",
+    "identity_confidence": null,
+    "availability": "unknown",
+    "costs_eur": {
+      "inbound_shipping": null, "buyer_fee": null, "refurbishment": null,
+      "import_reserve": null, "handling": null
+    }
+  },
+  "quotes": [{
+    "channel": "vinted", "country": "FR", "enabled": false,
+    "market_accessible": false, "category_allowed": false,
+    "fees_reviewed_at": null,
+    "fees_eur": {
+      "fixed_fee": null, "seller_shipping": null, "packaging": null,
+      "return_reserve": null, "customer_acquisition": null, "other_reserve": null
+    },
+    "fees_bps": {"platform": null, "business_reserve": null},
+    "comps": [],
+    "market": {
+      "verified_by": null, "verification_ref": null, "scope": null,
+      "window_days": null, "sold_count": null, "active_count": null,
+      "observed_at": null, "product_key": null, "condition_key": null,
+      "channel": "vinted", "market_country": "FR"
+    }
+  }],
+  "risk": {"reviewed_by": null, "score": null, "evidence_ref": null, "reviewed_at": null, "flags": []},
+  "fx": {}
+}

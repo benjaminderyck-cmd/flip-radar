@@ -1,0 +1,17 @@
+[
+  {
+    "id": "source_a_valider",
+    "label": "Modèle désactivé — à remplacer par une source autorisée",
+    "enabled": false,
+    "status": "pending",
+    "policy_url": "https://example.com/terms",
+    "reviewed_at": null,
+    "countries": ["FR", "DE", "BE", "ES", "IT", "NL"],
+    "currencies": ["EUR"],
+    "navigation_hosts": ["example.com"],
+    "resource_hosts": ["example.com"],
+    "search_url_template": "https://example.com/search?q={query}",
+    "listing_path_prefixes": ["/item/"],
+    "ready_selector": "body"
+  }
+]
