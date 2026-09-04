@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "files": [
     {
       "path": ".dockerignore",
@@ -43,33 +43,33 @@
     },
     {
       "path": "FLIP_RADAR_DEMARRAGE_V1.md",
-      "bytes": 2430,
-      "sha256": "5887b1193cd79aa364827d320ea93fa2e6c2959c9666a424afb7ace79aff1319"
+      "bytes": 2501,
+      "sha256": "2790736ce4153ac9b0449c5f11523e244a24a3a0151c79b821fff40e12c74632"
     },
     {
       "path": "package-lock.json",
       "bytes": 7564,
-      "sha256": "99d431056164b44c189a802fa5ed9e0d5dbf316dcad9b7b561417c12996e060b"
+      "sha256": "c4c3d782d7ff4bff9d2ed288ddbe72805e9d23f6590a8f995ed3c37b5b513ca0"
     },
     {
       "path": "package.json",
       "bytes": 665,
-      "sha256": "b711414a9a75fa1e5cca46ed520576c02ebd7cb5ac65e9ea7e15eb8e256b067e"
+      "sha256": "1cf3fac38163c0bdeee4a52f19663b57a5a58726189080637953d7b3ecff126b"
     },
     {
       "path": "README_FR.md",
-      "bytes": 16034,
-      "sha256": "7e2b3563504fff325473e2aaf0d9e062d6bcdf47f47f5fd0f9f2401b140344bd"
+      "bytes": 17350,
+      "sha256": "593260d5a9b007f4e02f640eb17aa2e57fcccc3b08808c352e75f5d280c6348c"
     },
     {
       "path": "scripts/build-workflows.mjs",
-      "bytes": 12550,
-      "sha256": "54929e75bd7ade4ba4ec6dee0bc5fdb4e5496a2dab0866656632ee9848685cd7"
+      "bytes": 21582,
+      "sha256": "9b98773334aced2a2290e0d34bbaba066eb01dc2c75ef187dbb1f6d569899623"
     },
     {
       "path": "scripts/check-package.mjs",
-      "bytes": 4989,
-      "sha256": "733d782b41402db45958d5aac6b362baf0ddb59e06ddb48fb6f9135bb1bdf87e"
+      "bytes": 4983,
+      "sha256": "5adc4b0486c39bedc626590bb02207e21e5f4d350f410b3972c4e0f0cfcb8928"
     },
     {
       "path": "scripts/import-dnid-sales.mjs",
@@ -124,7 +124,7 @@
     {
       "path": "src/playwright-browser.mjs",
       "bytes": 3986,
-      "sha256": "8bbd1e7190d409ca4d5f3d766d86a369cee956653a49c361b0608b1f57679c12"
+      "sha256": "5492d0cdea01325486a58f5e6a1f69302b034a38468da87cdfe86ab9ac672260"
     },
     {
       "path": "src/policy.mjs",
@@ -134,22 +134,22 @@
     {
       "path": "src/reference-data.mjs",
       "bytes": 8122,
-      "sha256": "19d3d95f2885cbe8877f4d94945fc27310aebdf7937b40744e98886edd2f23de"
+      "sha256": "43be9796a2ec7159df5d4716ae54191d4385651368e692595bc122ecce03edd6"
     },
     {
       "path": "src/self-test.mjs",
       "bytes": 2791,
-      "sha256": "09351a98c6dafcfe7c11cb827f45f97fb6996276b316f003fc8448316fa61111"
+      "sha256": "95d30c648d7eb4b11425dd11cac498661d84a8eb939d3fff2b1d1be3fcf7ff15"
     },
     {
       "path": "src/server.mjs",
-      "bytes": 9239,
-      "sha256": "b68761d8e53a5b4d42745eea54f612065ba0a679ed4c923d2ba9fd70ed706936"
+      "bytes": 10034,
+      "sha256": "f1377f4ab0f3f10850e540fcf573a0520c51f8a7efb69f870ddfab4a845450ca"
     },
     {
       "path": "src/store.mjs",
-      "bytes": 16432,
-      "sha256": "0fdbaa3659347d2cb8d0e75cbac732dd0f558919228093850843fced36db4411"
+      "bytes": 19450,
+      "sha256": "b78950122029f27f2c2a89838b472a2c7ea9e194177620ae657fe8a2cc5d2813"
     },
     {
       "path": "test/core.test.mjs",
@@ -173,8 +173,8 @@
     },
     {
       "path": "test/integration.test.mjs",
-      "bytes": 5505,
-      "sha256": "f3322f5a9184f0c8ae14aa4855523e66a3ac1cc7a693f1919e65e309483e8892"
+      "bytes": 6032,
+      "sha256": "1f9debbc7f8391708492cbe1062f857397c6e49687baae87493eb3b4d6b73aff"
     },
     {
       "path": "test/reference-data.test.mjs",
@@ -183,23 +183,23 @@
     },
     {
       "path": "test/server.test.mjs",
-      "bytes": 5797,
-      "sha256": "9025c90f8b306c438c6c93e80babd9eed2c64a6bf68215b89d2a3a2af1b23197"
+      "bytes": 6862,
+      "sha256": "ee296e00c121de21d30a9c16d9a26ef1d7fe9d6a1d5811f5fb6905d302145205"
     },
     {
       "path": "test/store.test.mjs",
-      "bytes": 9565,
-      "sha256": "1c5977fa1fad94e19f42a094397b3ed2012df0d8307a8b7688158fb4c55fde5b"
+      "bytes": 10802,
+      "sha256": "1db9761f593405a6c2492e45b9954f643276ec12b73a2b1ee1a8b3a52fadb9b4"
     },
     {
       "path": "test/workflows.test.mjs",
-      "bytes": 4686,
-      "sha256": "8268404a73b1329bbeb045c808a0bf0f0f34c4cc9c16b1da8a6fe86840e141f4"
+      "bytes": 7918,
+      "sha256": "16208d3fb5414bdd14344f6206e839d4e24e29e77c8b32b1ff11897356c49d3f"
     },
     {
       "path": "workflows/FLIP_RADAR_00_SELF_TEST.json",
       "bytes": 21840,
-      "sha256": "dac389d46bfdc7adb6b76fea207cfe4ed276735ccfe0199c0ed06b794bff3637"
+      "sha256": "9df390875b6aef24806340f413193018f82e28b7077c362e85d26787896eeaac"
     },
     {
       "path": "workflows/FLIP_RADAR_10_CREATE_MISSION.json",
@@ -225,6 +225,11 @@
       "path": "workflows/FLIP_RADAR_23_IMPORT_DNID_REFERENCE.json",
       "bytes": 6540,
       "sha256": "7a6416e1fd665252b77b04a63521d8234be9fd974a3606ca9cb7c05160db6cb7"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_24_PLAN_REFERENCE_FAMILIES.json",
+      "bytes": 15909,
+      "sha256": "374216c2f7f208eba46d3c3b52a69855339c3e6d6a4936f8e549774dc6f4f1f8"
     },
     {
       "path": "workflows/FLIP_RADAR_25_REVIEW.json",

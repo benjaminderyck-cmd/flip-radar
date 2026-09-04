@@ -16,11 +16,14 @@ test('HTTP to PostgreSQL pipeline: hunt, review, outbox, acknowledgement, no ext
     const env={FLIP_RADAR_WORKER_TOKEN:'integration-worker-token-FICTITIOUS-000',FLIP_RADAR_REVIEW_TOKEN:'integration-review-token-FICTITIOUS-111',FLIP_RADAR_LIVE_ENABLED:'true',FLIP_RADAR_ALERTS_ENABLED:'true'};
     const browser=new FakeBrowser(),model=new ScriptedModel(normalActions);
     const referenceImporter=async()=>{
-      const saved=await store.upsertReferenceSales([{source_id:'dnid_sales_2024',source_record_id:'900:abcdef0123456789',official_lot_id:'900',
+      const first={source_id:'dnid_sales_2024',source_record_id:'900:abcdef0123456789',official_lot_id:'900',
         description:'Console Nintendo Switch',description_derived:false,category:'Jeux vidéo',brand:'Nintendo',model:'Switch',
         first_registration_date:null,sale_number:'V900',sold_at:'2024-04-05',organizer:'PARIS',sale_name:'Vente 900',
         sold_price_eur_cents:14500,verification_ref:'https://www.data.gouv.fr/datasets/donnees-de-ventes-annee-2024',
-        source_updated_at:'2026-02-20T11:13:25.000Z',license_id:'etalab-2.0',raw_hash:'b'.repeat(64)}]);
+        source_updated_at:'2026-02-20T11:13:25.000Z',license_id:'etalab-2.0',raw_hash:'b'.repeat(64)};
+      const second={...first,source_record_id:'901:bcdef0123456789a',official_lot_id:'901',sale_number:'V901',
+        sold_price_eur_cents:15500,raw_hash:'c'.repeat(64)};
+      const saved=await store.upsertReferenceSales([first,second]);
       return {...saved,historical_only:true,eligible_as_current_market_proof:false};
     };
     // Test adapters only. No provider, marketplace, Telegram or real database.
@@ -57,7 +60,10 @@ test('HTTP to PostgreSQL pipeline: hunt, review, outbox, acknowledgement, no ext
     assert.equal(imported.status,202);await app.waitForJobs();
     assert.equal((await request('/v1/reference-sales/imports/'+imported.data.id)).data.status,'completed');
     const references=await request('/v1/reference-sales?brand=Nintendo');
-    assert.equal(references.data.records.length,1);assert.equal(references.data.historical_only,true);
+    assert.equal(references.data.records.length,2);assert.equal(references.data.historical_only,true);
     assert.equal(references.data.eligible_as_current_market_proof,false);
+    const families=await request('/v1/reference-sales/families?level=category&min_sales=2&limit=10');
+    assert.equal(families.status,200);assert.equal(families.data.groups[0].category,'Jeux vidéo');
+    assert.equal(families.data.historical_only,true);assert.equal(families.data.eligible_as_current_market_proof,false);
   }finally{if(app)await app.stop();await db.close();}
 });

@@ -125,7 +125,7 @@ export function parseDnidReferenceCsv(text,{sourceUpdatedAt=DNID_REFERENCE.datas
 export async function downloadDnidReference({fetchImpl=fetch,timeoutMs=90000}={}){
   const url=assertDnidDownloadUrl(DNID_REFERENCE.download_url);
   const response=await fetchImpl(url,{method:'GET',redirect:'error',signal:AbortSignal.timeout(timeoutMs),
-    headers:{accept:'text/csv','user-agent':'FLIP-RADAR/0.2 (official open-data importer)'}});
+    headers:{accept:'text/csv','user-agent':'FLIP-RADAR/0.3 (official open-data importer)'}});
   if(!response?.ok)throw new Error('REFERENCE_DOWNLOAD_FAILED');
   const length=Number(response.headers?.get?.('content-length'));
   if(Number.isFinite(length)&&length>DNID_REFERENCE.max_bytes)throw new Error('REFERENCE_FILE_TOO_LARGE');

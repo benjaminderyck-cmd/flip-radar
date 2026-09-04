@@ -11,7 +11,7 @@ export class PlaywrightBrowser {
       env:{PATH:process.env.PATH||'/usr/bin:/bin',LANG:'C.UTF-8'},
       args:['--disable-background-networking','--disable-quic','--disable-sync']});
     this.context=await this.browser.newContext({acceptDownloads:false,serviceWorkers:'block',
-      userAgent:'FLIP-RADAR/0.2 (read-only opportunity research)',viewport:{width:1280,height:900}});
+      userAgent:'FLIP-RADAR/0.3 (read-only opportunity research)',viewport:{width:1280,height:900}});
     await this.context.route('**/*',async route=>{
       const r=route.request();
       try {

@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
-import {buildWorkflows,CONFIG_CODE,ALERT_GATE_CODE} from '../scripts/build-workflows.mjs';
+import {buildWorkflows,CONFIG_CODE,ALERT_GATE_CODE,REFERENCE_PLAN_CODE,REFERENCE_EMIT_CODE} from '../scripts/build-workflows.mjs';
 import {runOfflineSelfTest} from '../src/self-test.mjs';
 
 const workflows=await buildWorkflows();
@@ -54,6 +54,47 @@ test('official reference import is manual, historical-only and uses no embedded 
   assert.equal(wf.nodes.some(n=>JSON.stringify(n).includes('FLIP_RADAR_LIVE_ENABLED=true')),false);
   assert.match(wf.nodes.find(n=>n.name==='Demarrer import historique').notes,/FLIP_RADAR_REVIEW/);
   assert.match(wf.nodes.find(n=>n.name==='Expliquer resultat').parameters.jsCode,/eligible_as_current_market_proof:false/);
+});
+function referencePlanGlobals({transmit=false,ready=false}={}){
+  const nodes={
+    'Configuration':{worker_url:'https://flip-radar.example',transmit_to_hunter:transmit,max_categories:12,max_missions:2},
+    'Verifier capacite Hunter':{live_enabled:ready,model_configured:ready,approved_source_count:ready?1:0,hunter_ready:ready},
+    'Lire categories historiques':{historical_only:true,eligible_as_current_market_proof:false,groups:[
+      {category:'Informatique',historical_sales_count:1000,distinct_organizers:10,historical_price_eur:{p25:200,median:500,p75:800}},
+      {category:'Vins et alcools',historical_sales_count:900,distinct_organizers:10,historical_price_eur:{p25:100,median:200,p75:400}},
+      {category:'Bijoux',historical_sales_count:600,distinct_organizers:5,historical_price_eur:{p25:100,median:300,p75:500}},
+    ]},
+    'Lire produits identifies':{historical_only:true,eligible_as_current_market_proof:false,groups:[
+      {category:'Informatique',brand:'APPLE',model:'MACBOOK PRO',historical_sales_count:8},
+    ]},
+  };
+  return {$:name=>({first:()=>({json:nodes[name]})})};
+}
+test('family planner produces diverse drafts but defaults to plan-only',()=>{
+  const result=execute(REFERENCE_PLAN_CODE,referencePlanGlobals())[0].json;
+  assert.equal(result.status,'PLAN_ONLY');assert.equal(result.transmission_allowed,false);
+  assert.equal(result.historical_only,true);assert.equal(result.eligible_as_current_market_proof,false);
+  assert.equal(result.mission_drafts.length,2);
+  assert.equal(result.mission_drafts.some(x=>x.family.category==='Vins et alcools'),false);
+  assert.match(result.mission_drafts[0].mission.objective,/ne jamais les utiliser comme preuve/i);
+  assert.equal(result.mission_drafts[0].mission.max_price,undefined);
+});
+test('family missions can be emitted only when operator and worker gates are ready',()=>{
+  const blocked=execute(REFERENCE_PLAN_CODE,referencePlanGlobals({transmit:true,ready:false}))[0].json;
+  assert.equal(blocked.transmission_allowed,false);assert.ok(blocked.transmission_blockers.includes('LIVE_DISABLED'));
+  const ready=execute(REFERENCE_PLAN_CODE,referencePlanGlobals({transmit:true,ready:true}))[0].json;
+  assert.equal(ready.transmission_allowed,true);assert.equal(ready.status,'READY_TO_QUEUE');
+  const emitted=execute(REFERENCE_EMIT_CODE,{$input:{first:()=>({json:ready})},$execution:{id:'fixture'}});
+  assert.equal(emitted.length,2);assert.equal(emitted[0].json.request_key,'n8n-family-fixture-0');
+  assert.throws(()=>execute(REFERENCE_EMIT_CODE,{$input:{first:()=>({json:blocked})},$execution:{id:'fixture'}}),/TRANSMISSION_NOT_ALLOWED/);
+});
+test('family planning workflow has a false branch that cannot create missions',()=>{
+  const wf=workflows.find(([name])=>name.includes('24_PLAN'))[1];
+  assert.equal(wf.active,false);assert.equal(wf.nodes.some(n=>n.type==='n8n-nodes-base.scheduleTrigger'),false);
+  const branches=wf.connections['Transmission autorisee'].main;
+  assert.equal(branches[0][0].node,'Emettre missions bornees');
+  assert.equal(branches[1][0].node,'Plan seulement - garde fou');
+  assert.match(wf.nodes.find(n=>n.name==='Configuration').parameters.jsCode,/transmit_to_hunter=false/);
 });
 test('Telegram gate blocks simulation and non-GO even if outbox is malformed',()=>{
   const globals=text=>({$input:{first:()=>({json:{status:'claimed',alert:{id:'one',claim_token:'two',text}}})},$:()=>({first:()=>({json:{chat_id:'123'}})})});

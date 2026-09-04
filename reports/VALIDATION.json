@@ -1,18 +1,18 @@
 {
   "project": "FLIP RADAR",
-  "version": "0.2.0",
-  "checked_at": "2026-09-04T01:04:45.997Z",
+  "version": "0.3.0",
+  "checked_at": "2026-09-04T19:07:44.623Z",
   "node": "v24.19.0",
   "status": "passed_local_checks_upgrade_not_deployed",
   "tests": {
-    "total": 120,
-    "passed": 120,
+    "total": 125,
+    "passed": 125,
     "failed": 0,
     "cancelled": 0,
     "skipped": 0
   },
   "javascript_files_syntax_checked": 25,
-  "n8n_workflows": 8,
+  "n8n_workflows": 9,
   "offline_self_test_cases": 19,
   "external_marketplace_calls": 0,
   "external_model_calls": 0,
@@ -24,15 +24,14 @@
     "playwright": "1.62.1"
   },
   "not_verified": [
-    "Workflow 23 import in user n8n instance",
-    "DNID import through deployed worker",
+    "Workflow 24 import in user n8n instance",
+    "Family aggregation through deployed worker",
     "Live marketplace browsing",
     "Production Chromium launch",
     "Live model quality/API",
     "Docker image build",
-    "Supabase migration 002",
     "Telegram delivery",
-    "Version 0.2 deployment",
+    "Version 0.3 deployment",
     "Multi-worker load"
   ]
 }

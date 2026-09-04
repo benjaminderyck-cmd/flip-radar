@@ -2,729 +2,759 @@ TAP version 13
 # Subtest: baseline has positive conservative economics, simulation cannot notify
 ok 1 - baseline has positive conservative economics, simulation cannot notify
   ---
-  duration_ms: 3.11671
+  duration_ms: 3.16812
   type: 'test'
   ...
 # Subtest: portable URL canonicalization agrees with standard query semantics
 ok 2 - portable URL canonicalization agrees with standard query semantics
   ---
-  duration_ms: 0.35768
+  duration_ms: 0.358984
   type: 'test'
   ...
 # Subtest: portable URL parser rejects credentials, ambiguous authority and dot paths
 ok 3 - portable URL parser rejects credentials, ambiguous authority and dot paths
   ---
-  duration_ms: 0.206346
+  duration_ms: 0.198996
   type: 'test'
   ...
 # Subtest: resale destination must also be in European scope
 ok 4 - resale destination must also be in European scope
   ---
-  duration_ms: 0.460452
+  duration_ms: 0.594433
   type: 'test'
   ...
 # Subtest: live assessed opportunity can be eligible, purchase is never executed
 ok 5 - live assessed opportunity can be eligible, purchase is never executed
   ---
-  duration_ms: 1.390581
+  duration_ms: 1.144591
   type: 'test'
   ...
 # Subtest: unknown inbound shipping
 ok 6 - unknown inbound shipping
   ---
-  duration_ms: 0.400874
+  duration_ms: 0.358262
   type: 'test'
   ...
 # Subtest: unknown business provisions
 ok 7 - unknown business provisions
   ---
-  duration_ms: 0.358281
+  duration_ms: 0.33664
   type: 'test'
   ...
 # Subtest: removed listings are not sales
 ok 8 - removed listings are not sales
   ---
-  duration_ms: 0.294536
+  duration_ms: 0.287357
   type: 'test'
   ...
 # Subtest: active asking prices are not sales
 ok 9 - active asking prices are not sales
   ---
-  duration_ms: 0.678285
+  duration_ms: 0.357071
   type: 'test'
   ...
 # Subtest: an LLM cannot attest a sold price
 ok 10 - an LLM cannot attest a sold price
   ---
-  duration_ms: 0.35092
+  duration_ms: 0.435919
   type: 'test'
   ...
 # Subtest: other model
 ok 11 - other model
   ---
-  duration_ms: 0.436898
+  duration_ms: 0.400916
   type: 'test'
   ...
 # Subtest: other condition
 ok 12 - other condition
   ---
-  duration_ms: 0.336098
+  duration_ms: 0.298273
   type: 'test'
   ...
 # Subtest: wrong resale market
 ok 13 - wrong resale market
   ---
-  duration_ms: 0.226065
+  duration_ms: 0.218505
   type: 'test'
   ...
 # Subtest: old comps
 ok 14 - old comps
   ---
-  duration_ms: 0.330049
+  duration_ms: 0.224724
   type: 'test'
   ...
 # Subtest: future comps
 ok 15 - future comps
   ---
-  duration_ms: 0.26994
+  duration_ms: 0.521134
   type: 'test'
   ...
 # Subtest: unknown demand
 ok 16 - unknown demand
   ---
-  duration_ms: 0.221138
+  duration_ms: 0.217964
   type: 'test'
   ...
 # Subtest: favourites cannot replace market counts
 ok 17 - favourites cannot replace market counts
   ---
-  duration_ms: 1.045179
+  duration_ms: 0.331553
   type: 'test'
   ...
 # Subtest: stale demand
 ok 18 - stale demand
   ---
-  duration_ms: 0.294316
+  duration_ms: 1.165693
   type: 'test'
   ...
 # Subtest: weak market even with margin
 ok 19 - weak market even with margin
   ---
-  duration_ms: 0.254968
+  duration_ms: 0.40972
   type: 'test'
   ...
 # Subtest: too much risk
 ok 20 - too much risk
   ---
-  duration_ms: 0.231012
+  duration_ms: 0.236832
   type: 'test'
   ...
 # Subtest: counterfeit
 ok 21 - counterfeit
   ---
-  duration_ms: 0.245053
+  duration_ms: 0.26884
   type: 'test'
   ...
 # Subtest: missing risk review
 ok 22 - missing risk review
   ---
-  duration_ms: 0.216401
+  duration_ms: 0.167159
   type: 'test'
   ...
 # Subtest: profit after all costs is negative
 ok 23 - profit after all costs is negative
   ---
-  duration_ms: 0.178875
+  duration_ms: 0.197514
   type: 'test'
   ...
 # Subtest: shipping destroys margin
 ok 24 - shipping destroys margin
   ---
-  duration_ms: 0.167058
+  duration_ms: 0.14792
   type: 'test'
   ...
 # Subtest: ambiguous model
 ok 25 - ambiguous model
   ---
-  duration_ms: 0.199606
+  duration_ms: 0.146397
   type: 'test'
   ...
 # Subtest: stale listing
 ok 26 - stale listing
   ---
-  duration_ms: 0.353574
+  duration_ms: 0.263813
   type: 'test'
   ...
 # Subtest: not currently available
 ok 27 - not currently available
   ---
-  duration_ms: 0.390479
+  duration_ms: 0.239687
   type: 'test'
   ...
 # Subtest: non-European acquisition
 ok 28 - non-European acquisition
   ---
-  duration_ms: 0.108811
+  duration_ms: 0.093168
   type: 'test'
   ...
 # Subtest: GBP without rate
 ok 29 - GBP without rate
   ---
-  duration_ms: 0.191934
+  duration_ms: 0.165756
   type: 'test'
   ...
 # Subtest: unsafe URL
 ok 30 - unsafe URL
   ---
-  duration_ms: 0.186787
+  duration_ms: 0.142772
   type: 'test'
   ...
 # Subtest: no destination
 ok 31 - no destination
   ---
-  duration_ms: 0.093999
+  duration_ms: 0.114039
   type: 'test'
   ...
 # Subtest: duplicate comparables do not strengthen proof
 ok 32 - duplicate comparables do not strengthen proof
   ---
-  duration_ms: 0.189241
+  duration_ms: 0.190744
   type: 'test'
   ...
 # Subtest: expensive object not rejected for price when evidence is sufficient
 ok 33 - expensive object not rejected for price when evidence is sufficient
   ---
-  duration_ms: 0.292324
+  duration_ms: 1.276327
   type: 'test'
   ...
 # Subtest: expensive item requires more evidence
 ok 34 - expensive item requires more evidence
   ---
-  duration_ms: 0.320284
+  duration_ms: 0.473364
   type: 'test'
   ...
 # Subtest: confirmed FX has source and recent date
 ok 35 - confirmed FX has source and recent date
   ---
-  duration_ms: 0.1217
+  duration_ms: 0.124795
   type: 'test'
   ...
 # Subtest: URL dedup removes only tracking parameters
 ok 36 - URL dedup removes only tracking parameters
   ---
-  duration_ms: 0.092196
+  duration_ms: 0.107469
   type: 'test'
   ...
 # Subtest: unverified lucrative route cannot beat valid route
 ok 37 - unverified lucrative route cannot beat valid route
   ---
-  duration_ms: 0.508123
+  duration_ms: 0.661173
   type: 'test'
   ...
 # Subtest: messages are plain text and labelled as simulation
 ok 38 - messages are plain text and labelled as simulation
   ---
-  duration_ms: 0.566129
+  duration_ms: 0.522777
   type: 'test'
   ...
 # Subtest: Gemini gets bounded JSON contract, not unrestricted tools
 ok 39 - Gemini gets bounded JSON contract, not unrestricted tools
   ---
-  duration_ms: 1.57886
+  duration_ms: 1.732535
   type: 'test'
   ...
 # Subtest: malformed JSON is not silently repaired into a command
 ok 40 - malformed JSON is not silently repaired into a command
   ---
-  duration_ms: 0.515324
+  duration_ms: 0.594724
   type: 'test'
   ...
 # Subtest: truncated model output fails closed
 ok 41 - truncated model output fails closed
   ---
-  duration_ms: 0.217703
+  duration_ms: 0.222992
   type: 'test'
   ...
 # Subtest: missing credentials produce no provider call
 ok 42 - missing credentials produce no provider call
   ---
-  duration_ms: 0.174338
+  duration_ms: 0.177955
   type: 'test'
   ...
 # Subtest: agent chooses a query, follows observed link and saves grounded data
 ok 43 - agent chooses a query, follows observed link and saves grounded data
   ---
-  duration_ms: 7.874
+  duration_ms: 8.300721
   type: 'test'
   ...
 # Subtest: agent can pivot query rather than iterate fixed URLs
 ok 44 - agent can pivot query rather than iterate fixed URLs
   ---
-  duration_ms: 0.737232
+  duration_ms: 0.783004
   type: 'test'
   ...
 # Subtest: unknown actions (buy, message) cannot execute
 ok 45 - unknown actions (buy, message) cannot execute
   ---
-  duration_ms: 0.59345
+  duration_ms: 0.574825
   type: 'test'
   ...
 # Subtest: unobserved link cannot be opened
 ok 46 - unobserved link cannot be opened
   ---
-  duration_ms: 0.67448
+  duration_ms: 0.36328
   type: 'test'
   ...
 # Subtest: same listing is not returned twice
 ok 47 - same listing is not returned twice
   ---
-  duration_ms: 0.677023
+  duration_ms: 0.722734
   type: 'test'
   ...
 # Subtest: browser always closes on model failure
 ok 48 - browser always closes on model failure
   ---
-  duration_ms: 0.356448
+  duration_ms: 0.328929
   type: 'test'
   ...
 # Subtest: page budget stops exploration
 ok 49 - page budget stops exploration
   ---
-  duration_ms: 0.320886
+  duration_ms: 0.323461
   type: 'test'
   ...
 # Subtest: challenge stops, no bypass
 ok 50 - challenge stops, no bypass
   ---
-  duration_ms: 0.395897
+  duration_ms: 0.459854
   type: 'test'
   ...
 # Subtest: an invented price is rejected even if model is confident
 ok 51 - an invented price is rejected even if model is confident
   ---
-  duration_ms: 0.302749
+  duration_ms: 0.288839
   type: 'test'
   ...
 # Subtest: search results page is not a sellable listing
 ok 52 - search results page is not a sellable listing
   ---
-  duration_ms: 0.260156
+  duration_ms: 0.251734
   type: 'test'
   ...
 # Subtest: model-provided trust and costs cannot enter saved candidate
 ok 53 - model-provided trust and costs cannot enter saved candidate
   ---
-  duration_ms: 0.267527
+  duration_ms: 0.289591
   type: 'test'
   ...
 # Subtest: source access must be reviewed
 ok 54 - source access must be reviewed
   ---
-  duration_ms: 0.187859
+  duration_ms: 0.152346
   type: 'test'
   ...
 # Subtest: blocked URL https://market.example.evil.com/item/1
 ok 55 - blocked URL https://market.example.evil.com/item/1
   ---
-  duration_ms: 0.136051
+  duration_ms: 0.116333
   type: 'test'
   ...
 # Subtest: blocked URL http://market.example/item/1
 ok 56 - blocked URL http://market.example/item/1
   ---
-  duration_ms: 0.060941
+  duration_ms: 0.061882
   type: 'test'
   ...
 # Subtest: blocked URL https://user:pass@market.example/item/1
 ok 57 - blocked URL https://user:pass@market.example/item/1
   ---
-  duration_ms: 0.056123
+  duration_ms: 0.057275
   type: 'test'
   ...
 # Subtest: blocked URL https://market.example:8443/item/1
 ok 58 - blocked URL https://market.example:8443/item/1
   ---
-  duration_ms: 0.049163
+  duration_ms: 0.049213
   type: 'test'
   ...
 # Subtest: blocked URL https://market.example/checkout
 ok 59 - blocked URL https://market.example/checkout
   ---
-  duration_ms: 0.048983
+  duration_ms: 0.049663
   type: 'test'
   ...
 # Subtest: blocked URL https://market.example/%63heckout
 ok 60 - blocked URL https://market.example/%63heckout
   ---
-  duration_ms: 0.050164
+  duration_ms: 0.048241
   type: 'test'
   ...
 # Subtest: blocked URL https://market.example/item/1?action=buy
 ok 61 - blocked URL https://market.example/item/1?action=buy
   ---
-  duration_ms: 0.071876
+  duration_ms: 0.068531
   type: 'test'
   ...
 # Subtest: blocked URL https://127.0.0.1/item/1
 ok 62 - blocked URL https://127.0.0.1/item/1
   ---
-  duration_ms: 0.045568
+  duration_ms: 0.08062
   type: 'test'
   ...
 # Subtest: private address 127.0.0.1
 ok 63 - private address 127.0.0.1
   ---
-  duration_ms: 0.115601
+  duration_ms: 0.116894
   type: 'test'
   ...
 # Subtest: private address 10.0.0.1
 ok 64 - private address 10.0.0.1
   ---
-  duration_ms: 0.040049
+  duration_ms: 0.042022
   type: 'test'
   ...
 # Subtest: private address 169.254.169.254
 ok 65 - private address 169.254.169.254
   ---
-  duration_ms: 0.03341
+  duration_ms: 0.039769
   type: 'test'
   ...
 # Subtest: private address 172.16.0.1
 ok 66 - private address 172.16.0.1
   ---
-  duration_ms: 0.03349
+  duration_ms: 0.195681
   type: 'test'
   ...
 # Subtest: private address 192.168.1.1
 ok 67 - private address 192.168.1.1
   ---
-  duration_ms: 0.057766
+  duration_ms: 0.034702
   type: 'test'
   ...
 # Subtest: private address 100.64.0.1
 ok 68 - private address 100.64.0.1
   ---
-  duration_ms: 0.042653
+  duration_ms: 0.031867
   type: 'test'
   ...
 # Subtest: private address ::1
 ok 69 - private address ::1
   ---
-  duration_ms: 0.868097
+  duration_ms: 0.055142
   type: 'test'
   ...
 # Subtest: private address fc00::1
 ok 70 - private address fc00::1
   ---
-  duration_ms: 0.102131
+  duration_ms: 0.063915
   type: 'test'
   ...
 # Subtest: private address fe80::1
 ok 71 - private address fe80::1
   ---
-  duration_ms: 0.072537
+  duration_ms: 0.086669
   type: 'test'
   ...
 # Subtest: private address ::ffff:127.0.0.1
 ok 72 - private address ::ffff:127.0.0.1
   ---
-  duration_ms: 0.055232
+  duration_ms: 0.068772
   type: 'test'
   ...
 # Subtest: public addresses pass IP gate
 ok 73 - public addresses pass IP gate
   ---
-  duration_ms: 0.127199
+  duration_ms: 0.141761
   type: 'test'
   ...
 # Subtest: DNS pointing into local network is blocked
 ok 74 - DNS pointing into local network is blocked
   ---
-  duration_ms: 0.428014
+  duration_ms: 0.214729
   type: 'test'
   ...
 # Subtest: query encoding cannot inject parameters
 ok 75 - query encoding cannot inject parameters
   ---
-  duration_ms: 0.111846
+  duration_ms: 0.104295
   type: 'test'
   ...
 # Subtest: locale price parsing is explicit
 ok 76 - locale price parsing is explicit
   ---
-  duration_ms: 0.199696
+  duration_ms: 0.203032
   type: 'test'
   ...
 # Subtest: malformed separators are not silently turned into a price
 ok 77 - malformed separators are not silently turned into a price
   ---
-  duration_ms: 0.109171
+  duration_ms: 0.147218
   type: 'test'
   ...
 # Subtest: currency must agree with the observed price marker
 ok 78 - currency must agree with the observed price marker
   ---
-  duration_ms: 0.152325
+  duration_ms: 0.178426
   type: 'test'
   ...
 # Subtest: HTTP to PostgreSQL pipeline: hunt, review, outbox, acknowledgement, no external action
 ok 79 - HTTP to PostgreSQL pipeline: hunt, review, outbox, acknowledgement, no external action
   ---
-  duration_ms: 2024.508057
+  duration_ms: 1847.883622
   type: 'test'
   ...
 # Subtest: semicolon CSV parser preserves quoted separators, quotes and line breaks
 ok 80 - semicolon CSV parser preserves quoted separators, quotes and line breaks
   ---
-  duration_ms: 1.45763
+  duration_ms: 1.55371
   type: 'test'
   ...
 # Subtest: DNID parser keeps reused lot IDs distinct and removes exact duplicates
 ok 81 - DNID parser keeps reused lot IDs distinct and removes exact duplicates
   ---
-  duration_ms: 1.803183
+  duration_ms: 1.786797
   type: 'test'
   ...
 # Subtest: blank descriptions get a transparent product fallback
 ok 82 - blank descriptions get a transparent product fallback
   ---
-  duration_ms: 0.311973
+  duration_ms: 0.205105
   type: 'test'
   ...
 # Subtest: invalid or missing prices are skipped and the header is strict
 ok 83 - invalid or missing prices are skipped and the header is strict
   ---
-  duration_ms: 0.313194
+  duration_ms: 0.300997
   type: 'test'
   ...
 # Subtest: only the exact approved HTTPS resource URL is accepted
 ok 84 - only the exact approved HTTPS resource URL is accepted
   ---
-  duration_ms: 0.262058
+  duration_ms: 0.252426
   type: 'test'
   ...
 # Subtest: download validates media type and import labels the dataset historical-only
 ok 85 - download validates media type and import labels the dataset historical-only
   ---
-  duration_ms: 3.563892
+  duration_ms: 3.519473
   type: 'test'
   ...
 # Subtest: description minimization redacts contact details and French registration plates
 ok 86 - description minimization redacts contact details and French registration plates
   ---
-  duration_ms: 0.156702
+  duration_ms: 0.14767
   type: 'test'
   ...
 # Subtest: two distinct strong API tokens required
 ok 87 - two distinct strong API tokens required
   ---
-  duration_ms: 1.186879
+  duration_ms: 1.325521
   type: 'test'
   ...
 # Subtest: invalid live run limits are rejected
 ok 88 - invalid live run limits are rejected
   ---
-  duration_ms: 0.251423
+  duration_ms: 0.163623
   type: 'test'
   ...
 # Subtest: public health reveals no private configuration
 ok 89 - public health reveals no private configuration
   ---
-  duration_ms: 24.227127
+  duration_ms: 25.260155
   type: 'test'
   ...
 # Subtest: private routes reject missing or wrong credentials
 ok 90 - private routes reject missing or wrong credentials
   ---
-  duration_ms: 9.602742
+  duration_ms: 9.372294
   type: 'test'
   ...
 # Subtest: worker cannot submit human evidence or decisions
 ok 91 - worker cannot submit human evidence or decisions
   ---
-  duration_ms: 10.049504
+  duration_ms: 13.151964
   type: 'test'
   ...
 # Subtest: historical reference search is authenticated and rejects unknown filters
 ok 92 - historical reference search is authenticated and rejects unknown filters
   ---
-  duration_ms: 4.889947
+  duration_ms: 4.840055
+  type: 'test'
+  ...
+# Subtest: historical family endpoint is bounded and never labelled current evidence
+ok 93 - historical family endpoint is bounded and never labelled current evidence
+  ---
+  duration_ms: 4.154676
+  type: 'test'
+  ...
+# Subtest: status exposes readiness booleans but no model key
+ok 94 - status exposes readiness booleans but no model key
+  ---
+  duration_ms: 2.059221
   type: 'test'
   ...
 # Subtest: only reviewer can start the official reference import
-ok 93 - only reviewer can start the official reference import
+ok 95 - only reviewer can start the official reference import
   ---
-  duration_ms: 5.856069
+  duration_ms: 4.390527
   type: 'test'
   ...
 # Subtest: request body cannot switch on live browsing or alerts
-ok 94 - request body cannot switch on live browsing or alerts
+ok 96 - request body cannot switch on live browsing or alerts
   ---
-  duration_ms: 4.143751
+  duration_ms: 3.958465
   type: 'test'
   ...
 # Subtest: JSON and body size are validated before storage
-ok 95 - JSON and body size are validated before storage
+ok 97 - JSON and body size are validated before storage
   ---
-  duration_ms: 9.392832
+  duration_ms: 8.755747
   type: 'test'
   ...
 # Subtest: mission route delegates without performing any browser action
-ok 96 - mission route delegates without performing any browser action
+ok 98 - mission route delegates without performing any browser action
   ---
-  duration_ms: 2.338496
+  duration_ms: 2.155435
   type: 'test'
   ...
 # Subtest: database secrets and unexpected exception text are never returned
-ok 97 - database secrets and unexpected exception text are never returned
+ok 99 - database secrets and unexpected exception text are never returned
   ---
-  duration_ms: 3.778721
+  duration_ms: 1.568272
   type: 'test'
   ...
 # Subtest: public error encoder exposes only bounded machine codes
-ok 98 - public error encoder exposes only bounded machine codes
+ok 100 - public error encoder exposes only bounded machine codes
   ---
-  duration_ms: 0.170062
+  duration_ms: 0.179827
   type: 'test'
   ...
 # Subtest: PostgreSQL migration is rerunnable and preserves existing source
-ok 99 - PostgreSQL migration is rerunnable and preserves existing source
+ok 101 - PostgreSQL migration is rerunnable and preserves existing source
   ---
-  duration_ms: 1593.445716
+  duration_ms: 1585.485323
   type: 'test'
   ...
 # Subtest: historical reference imports are idempotent, searchable and explicitly non-current
-ok 100 - historical reference imports are idempotent, searchable and explicitly non-current
+ok 102 - historical reference imports are idempotent, searchable and explicitly non-current
   ---
-  duration_ms: 13.180865
+  duration_ms: 20.147454
   type: 'test'
   ...
 # Subtest: mission request is idempotent, changed payload with same key conflicts
-ok 101 - mission request is idempotent, changed payload with same key conflicts
+ok 103 - mission request is idempotent, changed payload with same key conflicts
   ---
-  duration_ms: 11.852287
+  duration_ms: 11.828735
   type: 'test'
   ...
 # Subtest: live candidates persist, simulation data cannot enter database
-ok 102 - live candidates persist, simulation data cannot enter database
+ok 104 - live candidates persist, simulation data cannot enter database
   ---
-  duration_ms: 11.145509
+  duration_ms: 11.513838
   type: 'test'
   ...
 # Subtest: lost lease cannot finalize a mission twice
-ok 103 - lost lease cannot finalize a mission twice
+ok 105 - lost lease cannot finalize a mission twice
   ---
-  duration_ms: 10.365833
+  duration_ms: 10.637375
   type: 'test'
   ...
 # Subtest: duplicate observations deduplicate listings and events
-ok 104 - duplicate observations deduplicate listings and events
+ok 106 - duplicate observations deduplicate listings and events
   ---
-  duration_ms: 20.434427
+  duration_ms: 19.784994
   type: 'test'
   ...
 # Subtest: failed candidate insert rolls the entire run back
-ok 105 - failed candidate insert rolls the entire run back
+ok 107 - failed candidate insert rolls the entire run back
   ---
-  duration_ms: 14.790442
+  duration_ms: 15.557249
   type: 'test'
   ...
 # Subtest: review is idempotent and disabled alerts leave no outbox row
-ok 106 - review is idempotent and disabled alerts leave no outbox row
+ok 108 - review is idempotent and disabled alerts leave no outbox row
   ---
-  duration_ms: 19.241207
+  duration_ms: 18.714073
   type: 'test'
   ...
 # Subtest: review cannot change source URL, live mode or observation time
-ok 107 - review cannot change source URL, live mode or observation time
+ok 109 - review cannot change source URL, live mode or observation time
   ---
-  duration_ms: 10.067712
+  duration_ms: 10.103942
   type: 'test'
   ...
 # Subtest: same economics enqueue once; claimed alert cannot be sent again by another worker
-ok 108 - same economics enqueue once; claimed alert cannot be sent again by another worker
+ok 110 - same economics enqueue once; claimed alert cannot be sent again by another worker
   ---
-  duration_ms: 20.500704
+  duration_ms: 25.993234
   type: 'test'
   ...
 # Subtest: uncertain Telegram delivery is not blindly retried
-ok 109 - uncertain Telegram delivery is not blindly retried
+ok 111 - uncertain Telegram delivery is not blindly retried
   ---
-  duration_ms: 17.787834
+  duration_ms: 13.879645
   type: 'test'
   ...
 # Subtest: unknown costs and unverified demand never create an alert
-ok 110 - unknown costs and unverified demand never create an alert
+ok 112 - unknown costs and unverified demand never create an alert
   ---
-  duration_ms: 9.784803
+  duration_ms: 9.925256
   type: 'test'
   ...
 # Subtest: manual decision records intent, executes no purchase and is idempotent
-ok 111 - manual decision records intent, executes no purchase and is idempotent
+ok 113 - manual decision records intent, executes no purchase and is idempotent
   ---
-  duration_ms: 12.619113
+  duration_ms: 13.601422
   type: 'test'
   ...
 # Subtest: offline self-test runs the actual core with no external tools
-ok 112 - offline self-test runs the actual core with no external tools
+ok 114 - offline self-test runs the actual core with no external tools
   ---
-  duration_ms: 14.562634
+  duration_ms: 14.610862
   type: 'test'
   ...
 # Subtest: every workflow is inactive with a manual trigger and valid references
-ok 113 - every workflow is inactive with a manual trigger and valid references
+ok 115 - every workflow is inactive with a manual trigger and valid references
   ---
-  duration_ms: 0.994434
+  duration_ms: 1.29824
   type: 'test'
   ...
 # Subtest: default live workflow configuration fails before any request
-ok 114 - default live workflow configuration fails before any request
+ok 116 - default live workflow configuration fails before any request
   ---
-  duration_ms: 1.81501
+  duration_ms: 1.789921
   type: 'test'
   ...
 # Subtest: configured HTTPS worker origin works without URL or require globals
-ok 115 - configured HTTPS worker origin works without URL or require globals
+ok 117 - configured HTTPS worker origin works without URL or require globals
   ---
-  duration_ms: 0.756681
+  duration_ms: 0.739068
   type: 'test'
   ...
 # Subtest: mission is free of budget ceiling and carries execution idempotency key
-ok 116 - mission is free of budget ceiling and carries execution idempotency key
+ok 118 - mission is free of budget ceiling and carries execution idempotency key
   ---
-  duration_ms: 0.678586
+  duration_ms: 0.678909
   type: 'test'
   ...
 # Subtest: official reference import is manual, historical-only and uses no embedded credential
-ok 117 - official reference import is manual, historical-only and uses no embedded credential
+ok 119 - official reference import is manual, historical-only and uses no embedded credential
   ---
-  duration_ms: 0.284331
+  duration_ms: 0.648224
+  type: 'test'
+  ...
+# Subtest: family planner produces diverse drafts but defaults to plan-only
+ok 120 - family planner produces diverse drafts but defaults to plan-only
+  ---
+  duration_ms: 1.399701
+  type: 'test'
+  ...
+# Subtest: family missions can be emitted only when operator and worker gates are ready
+ok 121 - family missions can be emitted only when operator and worker gates are ready
+  ---
+  duration_ms: 2.460407
+  type: 'test'
+  ...
+# Subtest: family planning workflow has a false branch that cannot create missions
+ok 122 - family planning workflow has a false branch that cannot create missions
+  ---
+  duration_ms: 0.301849
   type: 'test'
   ...
 # Subtest: Telegram gate blocks simulation and non-GO even if outbox is malformed
-ok 118 - Telegram gate blocks simulation and non-GO even if outbox is malformed
+ok 123 - Telegram gate blocks simulation and non-GO even if outbox is malformed
   ---
-  duration_ms: 1.919325
+  duration_ms: 1.987855
   type: 'test'
   ...
 # Subtest: disabled or empty outbox ends execution before Telegram
-ok 119 - disabled or empty outbox ends execution before Telegram
+ok 124 - disabled or empty outbox ends execution before Telegram
   ---
-  duration_ms: 1.563737
+  duration_ms: 1.148076
   type: 'test'
   ...
 # Subtest: generated JSON exactly matches generator output
-ok 120 - generated JSON exactly matches generator output
+ok 125 - generated JSON exactly matches generator output
   ---
-  duration_ms: 9.083223
+  duration_ms: 10.063232
   type: 'test'
   ...
-1..120
-# tests 120
+1..125
+# tests 125
 # suites 0
-# pass 120
+# pass 125
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 4592.588162
+# duration_ms 4452.762956

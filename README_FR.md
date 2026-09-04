@@ -1,8 +1,19 @@
-# FLIP RADAR — worker 0.2
+# FLIP RADAR — worker 0.3
 
 Un socle exécutable pour rechercher des objets à revendre en Europe, avec n8n, un navigateur piloté par IA et une base PostgreSQL isolée.
 
-**État exact : le worker 0.1 est joignable sur Railway ; cette mise à jour 0.2 est prête à déployer.** La connexion n8n → Railway → Supabase a été validée. Les sources d'annonces actives, les recherches LIVE et les alertes restent désactivées. Aucun achat, paiement, message vendeur ou publication n'est automatisé.
+**État exact : le worker 0.2 fonctionne sur Railway avec 36 366 adjudications historiques importées ; cette mise à jour 0.3 est prête à déployer.** La connexion n8n → Railway → Supabase a été validée. Les sources d'annonces actives, les recherches LIVE et les alertes restent désactivées. Aucun achat, paiement, message vendeur ou publication n'est automatisé.
+
+## Mise à jour 0.3 depuis la version 0.2
+
+1. Aucune nouvelle migration SQL : conserver la base et les 36 366 références déjà importées.
+2. Remplacer les fichiers du dépôt GitHub par ceux de ce pack, sans supprimer `config/supabase-ca.crt`.
+3. Attendre Railway puis vérifier `/health` : `"version":"0.3.0"` et `"status":"up"`.
+4. Importer `workflows/FLIP_RADAR_24_PLAN_REFERENCE_FAMILIES.json` dans n8n, sans l'activer.
+5. Choisir `FLIP_RADAR_WORKER` dans chacun de ses nœuds HTTP.
+6. Lancer une fois avec `transmit_to_hunter=false`, valeur fournie par défaut. Le résultat attendu est `PLAN_ONLY_NOT_TRANSMITTED`.
+
+Le workflow classe les catégories et produits observés dans les adjudications 2024, exclut les catégories réglementées configurées et prépare au maximum cinq missions. Son score s'appelle `historical_research_score` : ce n'est ni une mesure de demande actuelle, ni une probabilité de vente, ni une estimation de profit. Même si quelqu'un change prématurément `transmit_to_hunter=true`, le workflow refuse l'envoi tant que le worker ne confirme pas simultanément LIVE, modèle et source active approuvée.
 
 ## Mise à jour 0.2 — ordre obligatoire
 
@@ -41,7 +52,7 @@ Vinted, Leboncoin et `own_site` sont des **destinations de calcul**, pas des con
 
 ## Organisation du pack
 
-- `workflows/` : huit workflows générés, tous inactifs et à déclenchement manuel, plus le master Europe déjà configuré.
+- `workflows/` : neuf workflows générés, tous inactifs et à déclenchement manuel, plus le master Europe déjà configuré.
 - `sql/001_foundation.sql` et `sql/002_reference_sales.sql` : schéma privé `flip_radar`, migrations additives et rejouables.
 - `src/` : moteur de calcul, agent, adaptateur navigateur, adaptateur Gemini, API et stockage.
 - `config/` : modèles de source et de revue, volontairement incomplets et désactivés.
@@ -121,6 +132,7 @@ Importer les autres JSON sans les activer. Dans chaque nœud « Configuration »
 | 21 MISSION STATUS | Lit le statut à partir du `mission_id` retourné ; pas de polling caché |
 | 22 READ CANDIDATES | Lit les 50 dernières annonces, à vérifier |
 | 23 IMPORT DNID | Importe manuellement les adjudications officielles 2024 ; credential REVIEW requis |
+| 24 PLAN FAMILIES | Classe les familles historiques et prépare des missions ; transmission au Hunter bloquée par défaut |
 | 25 REVIEW | Enregistre des preuves réelles via le credential REVIEW ; garde-fou à compléter explicitement |
 | 30 DISPATCH ALERT | Réserve, envoie et confirme une alerte ; secret Telegram et destination à renseigner |
 

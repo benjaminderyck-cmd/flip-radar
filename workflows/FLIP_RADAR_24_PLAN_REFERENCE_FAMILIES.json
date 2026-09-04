@@ -1,0 +1,387 @@
+{
+  "name": "FLIP RADAR 24 - PLANIFIER FAMILLES RENTABLES",
+  "nodes": [
+    {
+      "id": "c034c1c5-2bab-470d-a406-03ccda04f83a",
+      "name": "A lire avant execution",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -290
+      ],
+      "parameters": {
+        "content": "## Planificateur historique vers Web Hunter\nClasse des familles DNID pour orienter la prospection, sans les appeler rentables.\nPar defaut transmit_to_hunter=false : aucune mission envoyee, aucun navigateur lance.\nLe passage a true reste bloque si LIVE, modele ou source autorisee manque.\nAucun achat, message vendeur, publication ou contournement.",
+        "width": 640,
+        "height": 230
+      }
+    },
+    {
+      "id": "89a540d4-bbcc-4028-a05e-b58681b3f053",
+      "name": "Demarrage manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b332c349-2d5e-410a-a18e-b6d8b0dcd689",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const worker_url='https://flip-radar-production-1c7c.up.railway.app';\nconst transmit_to_hunter=false;\nconst max_categories=12;\nconst max_missions=5;\nif(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');\nif(typeof transmit_to_hunter!=='boolean'||!Number.isInteger(max_categories)||max_categories<1||max_categories>30\n  ||!Number.isInteger(max_missions)||max_missions<1||max_missions>10)throw new Error('PLAN_CONFIG_INVALID');\nreturn [{json:{worker_url:worker_url.replace(/\\/$/,''),transmit_to_hunter,max_categories,max_missions}}];"
+      }
+    },
+    {
+      "id": "e1f6784c-f370-4e66-aea7-f95dc5c47806",
+      "name": "Verifier capacite Hunter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/status' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    },
+    {
+      "id": "40220955-5aea-464e-ab3d-e8b60f342c30",
+      "name": "Lire categories historiques",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/reference-sales/families?level=category&min_sales=20&limit=60' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    },
+    {
+      "id": "3fbc90b0-94cb-4cf1-a701-55b3f6bb427d",
+      "name": "Lire produits identifies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/reference-sales/families?level=product&min_sales=3&limit=100' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    },
+    {
+      "id": "56a60614-69dc-4e5d-a3af-8c20b2f6b75a",
+      "name": "Construire plan exploratoire",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const categories=$('Lire categories historiques').first().json;\nconst products=$('Lire produits identifies').first().json;\nconst status=$('Verifier capacite Hunter').first().json;\nconst config=$('Configuration').first().json;\nif(categories.historical_only!==true||products.historical_only!==true\n  ||categories.eligible_as_current_market_proof!==false||products.eligible_as_current_market_proof!==false)throw new Error('REFERENCE_SCOPE_INVALID');\nconst prohibited=[/arme|munition|explosif/i,/alcool|vin|spiritueux/i,/tabac|cigarette/i,\n  /medicament|médicament|stupéfiant|drogue/i,/animal vivant/i,/immobilier|terrain|herbage/i];\nconst score=g=>{\n  const n=Math.max(0,Number(g.historical_sales_count)||0),org=Math.max(0,Number(g.distinct_organizers)||0);\n  const p=g.historical_price_eur||{},spread=Number(p.p25)>0?Number(p.p75)/Number(p.p25):Infinity;\n  const volume=Math.min(55,Math.round(14*Math.log2(1+n)));\n  const breadth=Math.min(25,org*2);\n  const consistency=spread<=2?20:spread<=4?12:spread<=8?6:0;\n  return Math.min(100,volume+breadth+consistency);\n};\nconst channels=category=>{\n  if(/vêtement|chaussure|accessoire|bijou|bagagerie|maroquinerie|beauté/i.test(category))return ['vinted','leboncoin','own_site'];\n  if(/véhicule|utilitaire|roue|voiturette|poids lourd|remorque|tracteur|bateau|quad/i.test(category))return ['leboncoin','own_site'];\n  return ['leboncoin','vinted','own_site'];\n};\nconst candidates=(categories.groups||[]).filter(g=>!prohibited.some(rule=>rule.test(g.category||'')))\n  .map(g=>({...g,historical_research_score:score(g)}))\n  .sort((a,b)=>b.historical_research_score-a.historical_research_score||b.historical_sales_count-a.historical_sales_count);\nconst chosen=candidates.slice(0,Math.min(12,config.max_categories));\nconst productGroups=products.groups||[];\nconst mission_drafts=chosen.map((family,index)=>{\n  const examples=productGroups.filter(p=>(p.category||'').toLocaleLowerCase('fr')===(family.category||'').toLocaleLowerCase('fr'))\n    .slice(0,3).map(p=>[p.brand,p.model].filter(Boolean).join(' '));\n  const channelHints=channels(family.category||'');\n  const objective=[\n    'Rechercher des annonces ACTIVES en Europe pour la famille '+family.category+'.',\n    examples.length?'Exemples historiques de requetes a tester : '+examples.join(', ')+'.':'Identifier les marques, modeles et sous-types visibles avant toute estimation.',\n    'Verifier la reference exacte, etat, disponibilite, cout achat complet, transport, frais et risque de contrefacon.',\n    'Mesurer la demande ACTUELLE uniquement avec des ventes recentes et verifiables, puis comparer les canaux '+channelHints.join(', ')+'.',\n    'Les '+family.historical_sales_count+' observations DNID 2024 et leurs prix de lots sont seulement une graine de recherche : ne jamais les utiliser comme preuve de demande, prix actuel ou marge.',\n    'Ne jamais acheter, contacter un vendeur, se connecter, publier ou contourner un blocage.'\n  ].join(' ');\n  return {family_rank:index+1,family:{category:family.category,historical_research_score:family.historical_research_score,\n      historical_sales_count:family.historical_sales_count,historical_price_eur:family.historical_price_eur,\n      example_products:examples,resale_channels_to_verify:channelHints},\n    mission:{objective,countries:['FR','DE','BE','ES','IT','NL','PT','AT','PL','SE','DK','FI','IE','CZ','CH','GB','NO'],\n      languages:['fr','en','de','es','it','nl','pt','pl'],source_ids:[]}};\n});\nconst blockers=[];\nif(config.transmit_to_hunter!==true)blockers.push('TRANSMISSION_DISABLED_IN_CONFIGURATION');\nif(status.live_enabled!==true)blockers.push('LIVE_DISABLED');\nif(status.model_configured!==true)blockers.push('MODEL_NOT_CONFIGURED');\nif(!(Number(status.approved_source_count)>0))blockers.push('NO_APPROVED_ACTIVE_SOURCE');\nconst transmission_allowed=blockers.length===0&&status.hunter_ready===true;\nreturn [{json:{project:'FLIP RADAR',workflow_version:'0.3.0',status:transmission_allowed?'READY_TO_QUEUE':'PLAN_ONLY',\n  historical_only:true,eligible_as_current_market_proof:false,method:'deterministic_historical_research_priority_not_profit_or_demand',\n  categories_considered:(categories.groups||[]).length,regulated_categories_excluded:true,\n  mission_drafts,transmission_allowed,transmission_blockers:blockers,max_missions:config.max_missions,\n  warning:'Plan exploratoire fonde sur des adjudications 2024. Chaque mission doit reconstruire demande, prix et marge avec des preuves actuelles.'}}];"
+      }
+    },
+    {
+      "id": "fea504ae-4420-43d0-a5d0-bcb4c4f537f4",
+      "name": "Transmission autorisee",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4433870f-973e-4d08-a9da-fa51abea2f1a",
+              "leftValue": "={{ $json.transmission_allowed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "7548bcb3-4892-481e-a3f3-f80d0ba8960f",
+      "name": "Emettre missions bornees",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const plan=$input.first().json;\nif(plan.transmission_allowed!==true)throw new Error('TRANSMISSION_NOT_ALLOWED');\nconst drafts=plan.mission_drafts.slice(0,plan.max_missions);\nif(!drafts.length)throw new Error('NO_MISSION_DRAFT');\nreturn drafts.map((draft,index)=>({json:{request_key:'n8n-family-'+$execution.id+'-'+index,mission:draft.mission}}));"
+      }
+    },
+    {
+      "id": "484ab010-1eb9-40af-a097-a0e01d3fddec",
+      "name": "Creer missions Hunter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/missions' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    },
+    {
+      "id": "c434f1db-a95c-4f44-afc8-fac71e167c18",
+      "name": "Resumer missions creees",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows=$input.all().map(item=>item.json);\nif(rows.some(row=>!row.id))throw new Error('MISSION_CREATE_RESPONSE_INVALID');\nreturn [{json:{project:'FLIP RADAR',status:'MISSIONS_QUEUED_NOT_RUN',missions_created:rows.length,\n  mission_ids:rows.map(row=>row.id),browser_started:false,purchases_executed:0,\n  message:'Missions en attente. Le navigateur ne demarre que via le workflow 20 ou le master, avec les garde-fous LIVE.'}}];"
+      }
+    },
+    {
+      "id": "019d492e-a669-4b52-abb8-afffcadeb8bf",
+      "name": "Plan seulement - garde fou",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const plan=$input.first().json;\nreturn [{json:{...plan,status:'PLAN_ONLY_NOT_TRANSMITTED',missions_created:0,browser_started:false,purchases_executed:0,\n  message:'Plan cree sans lancer le Hunter. Garder transmit_to_hunter=false tant que LIVE et une source autorisee ne sont pas valides.'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Demarrage manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Verifier capacite Hunter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifier capacite Hunter": {
+      "main": [
+        [
+          {
+            "node": "Lire categories historiques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire categories historiques": {
+      "main": [
+        [
+          {
+            "node": "Lire produits identifies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire produits identifies": {
+      "main": [
+        [
+          {
+            "node": "Construire plan exploratoire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construire plan exploratoire": {
+      "main": [
+        [
+          {
+            "node": "Transmission autorisee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transmission autorisee": {
+      "main": [
+        [
+          {
+            "node": "Emettre missions bornees",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Plan seulement - garde fou",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emettre missions bornees": {
+      "main": [
+        [
+          {
+            "node": "Creer missions Hunter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creer missions Hunter": {
+      "main": [
+        [
+          {
+            "node": "Resumer missions creees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

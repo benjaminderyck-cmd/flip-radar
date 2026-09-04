@@ -82,11 +82,18 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
   const server=createServer(async(req,res)=>{
     try{
       const requestUrl=new URL(req.url,'http://localhost'),path=requestUrl.pathname;
-      if(req.method==='GET'&&path==='/health')return send(res,200,{service:'flip-radar',version:'0.2.0',status:'up'});
+      if(req.method==='GET'&&path==='/health')return send(res,200,{service:'flip-radar',version:'0.3.0',status:'up'});
       const who=role(req,config);
       if(!who)return send(res,401,{error:'UNAUTHORIZED'});
       if(req.method==='GET'&&path==='/v1/status'){
-        await store.health();return send(res,200,{database:'ready',live_enabled:config.liveEnabled,alerts_enabled:config.alertsEnabled,busy,reference_import_busy:referenceBusy});
+        await store.health();
+        const sources=await store.sources(),approvedSourceCount=sources.reduce((count,source)=>{
+          try{assertSource(source);return count+1;}catch{return count;}
+        },0);
+        const modelConfigured=Boolean(config.apiKey&&config.model);
+        return send(res,200,{database:'ready',live_enabled:config.liveEnabled,alerts_enabled:config.alertsEnabled,
+          model_configured:modelConfigured,approved_source_count:approvedSourceCount,
+          hunter_ready:config.liveEnabled&&modelConfigured&&approvedSourceCount>0,busy,reference_import_busy:referenceBusy});
       }
       if(req.method==='GET'&&path==='/v1/listings')return send(res,200,{listings:await store.listings()});
       if(req.method==='GET'&&path==='/v1/opportunities')return send(res,200,{opportunities:await store.opportunities()});
@@ -94,6 +101,11 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
         const allowed=new Set(['q','brand','model','category','limit']);
         if([...requestUrl.searchParams.keys()].some(name=>!allowed.has(name)))throw new Error('REFERENCE_QUERY_INVALID');
         return send(res,200,await store.referenceSales(Object.fromEntries(requestUrl.searchParams)));
+      }
+      if(req.method==='GET'&&path==='/v1/reference-sales/families'){
+        const allowed=new Set(['level','min_sales','limit']);
+        if([...requestUrl.searchParams.keys()].some(name=>!allowed.has(name)))throw new Error('REFERENCE_QUERY_INVALID');
+        return send(res,200,await store.referenceFamilies(Object.fromEntries(requestUrl.searchParams)));
       }
       if(req.method==='GET'&&path.startsWith('/v1/reference-sales/imports/')){
         const item=await store.referenceImport(path.split('/').at(-1));return send(res,item?200:404,item||{error:'NOT_FOUND'});

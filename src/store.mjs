@@ -14,6 +14,11 @@ function referenceTerm(value) {
   if(typeof value!=='string'||value.length>120||/[\u0000-\u001f\u007f]/.test(value)||!value.trim())throw new Error('REFERENCE_QUERY_INVALID');
   return value.trim().replace(/[\\%_]/g,char=>'\\'+char);
 }
+function referenceInteger(value,{fallback,min,max,code}) {
+  const parsed=value===undefined||value===null||value===''?fallback:Number(value);
+  if(!Number.isInteger(parsed)||parsed<min||parsed>max)throw new Error(code);
+  return parsed;
+}
 
 export class PgStore {
   constructor(pool) {this.pool=pool;}
@@ -111,6 +116,39 @@ export class PgStore {
       warning:'Historique 2024 uniquement : ne prouve ni la demande actuelle ni un prix de revente actuel.',
       total_matches:rows[0]?.total_matches||0,records:rows.map(row=>({...row,
         sold_price_eur:Number(row.sold_price_eur_cents)/100,sold_price_eur_cents:undefined,total_matches:undefined}))};
+  }
+  async referenceFamilies(filters={}) {
+    const level=filters.level||'category';
+    if(!['category','product'].includes(level))throw new Error('REFERENCE_LEVEL_INVALID');
+    const minSales=referenceInteger(filters.min_sales,{fallback:3,min:2,max:5000,code:'REFERENCE_MIN_SALES_INVALID'});
+    const limit=referenceInteger(filters.limit,{fallback:30,min:1,max:100,code:'REFERENCE_LIMIT_INVALID'});
+    const expressions=level==='category'?{
+      category:"COALESCE(NULLIF(btrim(category),''),'Non classé')",brand:'NULL::text',model:'NULL::text',where:'TRUE',
+    }:{
+      category:"COALESCE(NULLIF(btrim(category),''),'Non classé')",brand:'upper(btrim(brand))',
+      model:"upper(regexp_replace(btrim(model),'\\s+',' ','g'))",
+      where:`brand IS NOT NULL AND btrim(brand)<>'' AND model IS NOT NULL AND btrim(model)<>''
+        AND upper(btrim(brand)) NOT IN ('NON CONNU','INCONNU','N/A','NA','UNKNOWN')
+        AND upper(btrim(model)) NOT IN ('NON CONNU','INCONNU','N/A','NA','UNKNOWN')`,
+    };
+    const rows=(await this.pool.query(`SELECT ${expressions.category} AS category,${expressions.brand} AS brand,
+      ${expressions.model} AS model,count(*)::int AS historical_sales_count,
+      count(DISTINCT sale_number)::int AS distinct_sales,count(DISTINCT organizer)::int AS distinct_organizers,
+      min(sold_at) AS first_sold_at,max(sold_at) AS last_sold_at,
+      percentile_disc(0.25) WITHIN GROUP (ORDER BY sold_price_eur_cents)::bigint AS p25_eur_cents,
+      percentile_disc(0.5) WITHIN GROUP (ORDER BY sold_price_eur_cents)::bigint AS median_eur_cents,
+      percentile_disc(0.75) WITHIN GROUP (ORDER BY sold_price_eur_cents)::bigint AS p75_eur_cents
+      FROM flip_radar.reference_sales WHERE source_id='dnid_sales_2024' AND ${expressions.where}
+      GROUP BY 1,2,3 HAVING count(*) >= $1
+      ORDER BY historical_sales_count DESC,category,brand NULLS LAST,model NULLS LAST LIMIT $2`,[minSales,limit])).rows;
+    const eur=value=>Math.round(Number(value))/100;
+    return {source_id:'dnid_sales_2024',level,historical_only:true,eligible_as_current_market_proof:false,
+      methodology:'Grouped historical adjudications; counts are observations in the DNID 2024 dataset, not buyer demand.',
+      warning:'Historique 2024 uniquement : ces groupes servent à préparer des recherches, pas à prouver rentabilité ou demande actuelle.',
+      groups:rows.map(row=>({category:row.category,brand:row.brand,model:row.model,
+        historical_sales_count:row.historical_sales_count,distinct_sales:row.distinct_sales,
+        distinct_organizers:row.distinct_organizers,first_sold_at:row.first_sold_at,last_sold_at:row.last_sold_at,
+        historical_price_eur:{p25:eur(row.p25_eur_cents),median:eur(row.median_eur_cents),p75:eur(row.p75_eur_cents)}}))};
   }
   async createMission(request) {
     key(request.request_key);validateMission(request.mission);

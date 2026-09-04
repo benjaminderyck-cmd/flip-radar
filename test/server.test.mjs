@@ -5,10 +5,12 @@ import {buildServer,loadConfig,publicError} from '../src/server.mjs';
 const env={FLIP_RADAR_WORKER_TOKEN:'test-worker-token-not-a-real-secret-1234',FLIP_RADAR_REVIEW_TOKEN:'test-review-token-not-a-real-secret-5678'};
 async function withServer(fn,overrides={},buildOverrides={}){
   const calls=[];
-  const store={health:async()=>true,listings:async()=>[],opportunities:async()=>[],
+  const store={health:async()=>true,sources:async()=>[],listings:async()=>[],opportunities:async()=>[],
     createMission:async x=>{calls.push(x);return {id:'fixture-id',created:true};},
     review:async()=>({id:'fixture-review'}),recordDecision:async()=>({transaction_executed:false}),
-    referenceSales:async()=>({historical_only:true,records:[]}),referenceImport:async()=>null,
+    referenceSales:async()=>({historical_only:true,records:[]}),
+    referenceFamilies:async filters=>({historical_only:true,eligible_as_current_market_proof:false,filters,groups:[]}),
+    referenceImport:async()=>null,
     createReferenceImport:async()=>({id:'12345678-1234-4123-a123-123456789abc',status:'queued',created:true}),
     startReferenceImport:async id=>({id,source_id:'dnid_sales_2024'}),
     finishReferenceImport:async()=>({status:'completed'}),failReferenceImport:async()=>{},
@@ -32,7 +34,7 @@ test('invalid live run limits are rejected',()=>{
   assert.throws(()=>loadConfig({...env,FLIP_RADAR_MAX_STEPS:'-1'}),/INVALID_RUN_LIMIT/);
 });
 test('public health reveals no private configuration',async()=>withServer(async({request})=>{
-  const r=await request('/health',{token:''});assert.equal(r.status,200);assert.equal(r.data.service,'flip-radar');
+  const r=await request('/health',{token:''});assert.equal(r.status,200);assert.equal(r.data.service,'flip-radar');assert.equal(r.data.version,'0.3.0');
   assert.equal(JSON.stringify(r.data).includes('token'),false);
 }));
 test('private routes reject missing or wrong credentials',async()=>withServer(async({request})=>{
@@ -48,6 +50,18 @@ test('historical reference search is authenticated and rejects unknown filters',
   const ok=await request('/v1/reference-sales?brand=Nintendo');
   assert.equal(ok.status,200);assert.equal(ok.data.historical_only,true);
   assert.equal((await request('/v1/reference-sales?sort=price')).data.error,'REFERENCE_QUERY_INVALID');
+}));
+test('historical family endpoint is bounded and never labelled current evidence',async()=>withServer(async({request})=>{
+  const ok=await request('/v1/reference-sales/families?level=category&min_sales=20&limit=40');
+  assert.equal(ok.status,200);assert.equal(ok.data.historical_only,true);
+  assert.equal(ok.data.eligible_as_current_market_proof,false);
+  assert.equal(ok.data.filters.level,'category');
+  assert.equal((await request('/v1/reference-sales/families?sort=profit')).data.error,'REFERENCE_QUERY_INVALID');
+}));
+test('status exposes readiness booleans but no model key',async()=>withServer(async({request})=>{
+  const status=(await request('/v1/status')).data;
+  assert.equal(status.approved_source_count,0);assert.equal(status.model_configured,false);
+  assert.equal(status.hunter_ready,false);assert.equal(JSON.stringify(status).includes('apiKey'),false);
 }));
 test('only reviewer can start the official reference import',async()=>{
   let completed=false;
@@ -76,7 +90,7 @@ test('mission route delegates without performing any browser action',async()=>wi
 }));
 test('database secrets and unexpected exception text are never returned',async()=>withServer(async({request})=>{
   const r=await request('/v1/status');assert.equal(r.status,500);assert.equal(r.data.error,'INTERNAL_ERROR');
-},{health:async()=>{throw new Error('postgres://private:secret@host/database');}}));
+},{health:async()=>{throw new Error('database connection contains private credentials');}}));
 test('public error encoder exposes only bounded machine codes',()=>{
   assert.equal(publicError(new Error('LIVE_DISABLED')),'LIVE_DISABLED');
   assert.equal(publicError(new Error('my token: private')),'INTERNAL_ERROR');

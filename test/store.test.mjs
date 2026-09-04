@@ -51,8 +51,22 @@ test('historical reference imports are idempotent, searchable and explicitly non
   assert.equal(result.records.length,1);assert.equal(result.records[0].sold_price_eur,150);
   assert.equal(result.records[0].official_lot_id,'42');assert.equal(result.historical_only,true);
   assert.equal(result.eligible_as_current_market_proof,false);
+  const more=[10000,20000,30000].map((price,index)=>({...record,
+    source_record_id:`${43+index}:${String(index+1).repeat(16)}`,official_lot_id:String(43+index),
+    brand:index===0?'nintendo':'NINTENDO',model:index===1?'switch':'SWITCH',
+    sale_number:'V'+(43+index),sold_price_eur_cents:price,raw_hash:String(index+1).repeat(64)}));
+  await store.upsertReferenceSales(more);
+  const products=await store.referenceFamilies({level:'product',min_sales:2,limit:10});
+  assert.equal(products.historical_only,true);assert.equal(products.eligible_as_current_market_proof,false);
+  assert.equal(products.groups[0].brand,'NINTENDO');assert.equal(products.groups[0].model,'SWITCH');
+  assert.equal(products.groups[0].historical_sales_count,4);
+  assert.deepEqual(products.groups[0].historical_price_eur,{p25:100,median:150,p75:200});
+  const categories=await store.referenceFamilies({level:'category',min_sales:2,limit:10});
+  assert.equal(categories.groups[0].category,'Jeux vidéo');assert.equal(categories.groups[0].historical_sales_count,4);
   await assert.rejects(()=>store.referenceSales({}),/REFERENCE_QUERY_REQUIRED/);
   await assert.rejects(()=>store.referenceSales({q:'x',limit:51}),/REFERENCE_LIMIT_INVALID/);
+  await assert.rejects(()=>store.referenceFamilies({level:'profit'}),/REFERENCE_LEVEL_INVALID/);
+  await assert.rejects(()=>store.referenceFamilies({min_sales:1}),/REFERENCE_MIN_SALES_INVALID/);
 });
 test('mission request is idempotent, changed payload with same key conflicts',async()=>{
   const req={request_key:'dedup-mission',mission:mission()};
