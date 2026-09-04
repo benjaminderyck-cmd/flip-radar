@@ -1,6 +1,6 @@
 // Pure deterministic functions. Embedded unchanged in the n8n offline self-test.
 export const RULES = Object.freeze({
-  version: 'foundation-0.1.0', min_profit_eur: 25, min_roi: 0.20,
+  version: 'foundation-0.2.0', min_profit_eur: 25, min_roi: 0.20,
   min_demand: 60, max_risk: 35, min_identity: 0.90,
   min_comps: 5, expensive_review_eur: 2500, expensive_min_comps: 8,
   max_comp_age_days: 90, max_market_age_days: 7,
@@ -100,7 +100,7 @@ export function comparableSales(listing, quote, fx, now, rules=RULES) {
     if (!safeUrl(c.url)) reason='URL_MISSING'; else url=canonicalUrl(c.url);
     if (!reason && seen.has(url)) reason='DUPLICATE';
     if (!reason && c.status !== 'sold') reason='NOT_A_CONFIRMED_SALE';
-    if (!reason && (c.price_confirmed !== true || !['human','official_api'].includes(c.verified_by)
+    if (!reason && (c.price_confirmed !== true || !['human','official_api','official_open_data'].includes(c.verified_by)
       || !safeUrl(c.verification_ref))) reason='UNVERIFIED_PRICE_OR_STATUS';
     if (!reason && (c.product_key !== listing.product_key || c.condition_key !== listing.condition_key)) reason='PRODUCT_OR_CONDITION_MISMATCH';
     if (!reason && (c.channel !== quote.channel || c.market_country !== quote.country)) reason='MARKET_MISMATCH';
@@ -118,7 +118,7 @@ export function comparableSales(listing, quote, fx, now, rules=RULES) {
 }
 export function demandMetrics(quote, accepted, now, rules=RULES) {
   const m=quote.market, reasons=[];
-  if (!m || !['human','official_api'].includes(m.verified_by) || !safeUrl(m.verification_ref)) reasons.push('DEMAND_UNVERIFIED');
+  if (!m || !['human','official_api','official_open_data'].includes(m.verified_by) || !safeUrl(m.verification_ref)) reasons.push('DEMAND_UNVERIFIED');
   if (!m || m.scope !== 'complete_window' || !Number.isInteger(m.window_days) || m.window_days<7 || m.window_days>90
     || !Number.isInteger(m.sold_count) || m.sold_count<0 || !Number.isInteger(m.active_count) || m.active_count<0) reasons.push('DEMAND_WINDOW_UNKNOWN');
   if (!m || !recent(m.observed_at,now,rules.max_market_age_days)) reasons.push('DEMAND_STALE');

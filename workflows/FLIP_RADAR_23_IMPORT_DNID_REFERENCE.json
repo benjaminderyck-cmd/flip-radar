@@ -1,0 +1,234 @@
+{
+  "name": "FLIP RADAR 23 - IMPORTER REFERENCES DNID",
+  "nodes": [
+    {
+      "id": "c034c1c5-2bab-470d-a406-03ccda04f83a",
+      "name": "A lire avant execution",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -290
+      ],
+      "parameters": {
+        "content": "## Import officiel, manuel et historique\nExecute seulement apres la migration SQL 002 et avec FLIP_RADAR_REVIEW.\nTelecharge une URL data.gouv.fr exacte et autorisee, puis stocke les adjudications 2024.\nCes lignes servent de references exploratoires : jamais de preuve de demande ou de prix actuel.\nAucun scraping, marketplace, achat, vendeur, Telegram ou activation LIVE.",
+        "width": 640,
+        "height": 230
+      }
+    },
+    {
+      "id": "89a540d4-bbcc-4028-a05e-b58681b3f053",
+      "name": "Demarrage manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b332c349-2d5e-410a-a18e-b6d8b0dcd689",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const worker_url='https://flip-radar-production-1c7c.up.railway.app';\nif(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');\nreturn [{json:{worker_url:worker_url.replace(/\\/$/,'')}}];"
+      }
+    },
+    {
+      "id": "c74b2298-8758-4c4a-ae66-c45509c3a206",
+      "name": "Demander import officiel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{json:{request_key:'n8n-dnid-reference-'+$execution.id}}];"
+      }
+    },
+    {
+      "id": "e89f0071-b2e3-43e4-ad30-feb9c74e8609",
+      "name": "Demarrer import historique",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/reference-sales/import' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Credential Header Auth FLIP_RADAR_REVIEW obligatoire. Import manuel de la ressource officielle DNID uniquement."
+    },
+    {
+      "id": "26e6caa7-d675-48da-af89-d9fd8646932d",
+      "name": "Attendre 30 secondes",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 30,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "8ccf6ca2-1914-4073-a172-7def726d165b",
+      "name": "Lire etat import",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/reference-sales/imports/' + $('Demarrer import historique').first().json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Credential Header Auth FLIP_RADAR_REVIEW. Si status=running, attendre puis relire le meme import_id ; ne pas relancer un nouvel import."
+    },
+    {
+      "id": "dbd23bc1-9741-41ab-aa01-624d1e0bc159",
+      "name": "Expliquer resultat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const x=$input.first().json;\nif(!['queued','running','completed','failed'].includes(x.status))throw new Error('IMPORT_STATUS_INVALID');\nreturn [{json:{...x,historical_only:true,eligible_as_current_market_proof:false,warning:'Ventes DNID 2024 : references historiques seulement. Elles ne prouvent ni la demande actuelle ni le prix actuel de revente.'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Demarrage manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Demander import officiel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Demander import officiel": {
+      "main": [
+        [
+          {
+            "node": "Demarrer import historique",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Demarrer import historique": {
+      "main": [
+        [
+          {
+            "node": "Attendre 30 secondes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendre 30 secondes": {
+      "main": [
+        [
+          {
+            "node": "Lire etat import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire etat import": {
+      "main": [
+        [
+          {
+            "node": "Expliquer resultat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

@@ -1,0 +1,245 @@
+{
+  "version": "0.2.0",
+  "files": [
+    {
+      "path": ".dockerignore",
+      "bytes": 92,
+      "sha256": "e441b17d3e5f86e5202fb6681603bcc1ba600bd2a21721b0985c34382fa6609c"
+    },
+    {
+      "path": ".env.example",
+      "bytes": 819,
+      "sha256": "d740cc9fe7eb72f59ee3a5cfcc6ac3dc8ac4f6cf3fd0376f7dc25f1396e171e8"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 66,
+      "sha256": "5d44d3be3f2df6eb1c97cd25550e6bc0e8d0990f08b1407811ca4cb2213a99d5"
+    },
+    {
+      "path": "config/review.template.json",
+      "bytes": 1279,
+      "sha256": "f33f49891651151717664b37f454be95b56f8e9d2ad7eff630fba00668243552"
+    },
+    {
+      "path": "config/sources.example.json",
+      "bytes": 539,
+      "sha256": "2a277794599b451283f9616fadf2e9f9e6c6f9a0ecebbebe452bfec285b8cc2a"
+    },
+    {
+      "path": "Dockerfile",
+      "bytes": 454,
+      "sha256": "f0305f953d25c388948e4f6efdca4ba96bdcfa7e2a5f9a0920d72219f79c1bd8"
+    },
+    {
+      "path": "docs/COMPATIBILITY.md",
+      "bytes": 2362,
+      "sha256": "969c5533314bb0fe06c27e8a242e44f7e32c91d4c7d54b7ae8301d92e76d8bda"
+    },
+    {
+      "path": "docs/DATA_CONTRACT.md",
+      "bytes": 9840,
+      "sha256": "6df2b6c171b20218414cc106798dce3016b712c304fd211744aa3afca4e39332"
+    },
+    {
+      "path": "FLIP_RADAR_DEMARRAGE_V1.md",
+      "bytes": 2430,
+      "sha256": "5887b1193cd79aa364827d320ea93fa2e6c2959c9666a424afb7ace79aff1319"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 7564,
+      "sha256": "99d431056164b44c189a802fa5ed9e0d5dbf316dcad9b7b561417c12996e060b"
+    },
+    {
+      "path": "package.json",
+      "bytes": 665,
+      "sha256": "b711414a9a75fa1e5cca46ed520576c02ebd7cb5ac65e9ea7e15eb8e256b067e"
+    },
+    {
+      "path": "README_FR.md",
+      "bytes": 16034,
+      "sha256": "7e2b3563504fff325473e2aaf0d9e062d6bcdf47f47f5fd0f9f2401b140344bd"
+    },
+    {
+      "path": "scripts/build-workflows.mjs",
+      "bytes": 12550,
+      "sha256": "54929e75bd7ade4ba4ec6dee0bc5fdb4e5496a2dab0866656632ee9848685cd7"
+    },
+    {
+      "path": "scripts/check-package.mjs",
+      "bytes": 4989,
+      "sha256": "733d782b41402db45958d5aac6b362baf0ddb59e06ddb48fb6f9135bb1bdf87e"
+    },
+    {
+      "path": "scripts/import-dnid-sales.mjs",
+      "bytes": 547,
+      "sha256": "a3954bab9a450a3be6bd8bc37306a44da4da540684e5ea909273f66328167117"
+    },
+    {
+      "path": "scripts/import-sources.mjs",
+      "bytes": 1121,
+      "sha256": "cd211bfced67bfe12a7aba610cca9f4028c4faf7de2ea968849d3815f5f5dcd6"
+    },
+    {
+      "path": "scripts/migrate.mjs",
+      "bytes": 474,
+      "sha256": "83237630ee1efa9525c91ea9f7efe67d8cfeca6812c131d21a61a8a611d7e67e"
+    },
+    {
+      "path": "scripts/self-test.mjs",
+      "bytes": 115,
+      "sha256": "9ea02b57ece43efb7e6a3716452cee39e91b6068f6607fa162b6647e64e37e00"
+    },
+    {
+      "path": "sql/001_foundation.sql",
+      "bytes": 5232,
+      "sha256": "89388751057a3b56c5e9b5ca34199d662f8dc39d8af774c04a46cf33c16796a0"
+    },
+    {
+      "path": "sql/002_reference_sales.sql",
+      "bytes": 2419,
+      "sha256": "37395d8dfb9019f3872a9c3031974e95c8ef7e81330275599720285edeb18601"
+    },
+    {
+      "path": "src/core.mjs",
+      "bytes": 15309,
+      "sha256": "5bd33011e1ffeee50d09bba246f9f55d24495c2c207ec2034b727cefe5a67ba9"
+    },
+    {
+      "path": "src/db.mjs",
+      "bytes": 543,
+      "sha256": "b2cdf959f431f950e1cb3fe0e82aad608772e0dc4aaebaec2e8a154f9dc06187"
+    },
+    {
+      "path": "src/gemini.mjs",
+      "bytes": 2080,
+      "sha256": "99468f745b115deb5181a61791bbbf77720528444a1a2a7c3315892730049b32"
+    },
+    {
+      "path": "src/hunter.mjs",
+      "bytes": 9467,
+      "sha256": "e86c83438ad6e9830a7d15dee4ed398e63a6421d8a48b002fec860ff6359cde8"
+    },
+    {
+      "path": "src/playwright-browser.mjs",
+      "bytes": 3986,
+      "sha256": "8bbd1e7190d409ca4d5f3d766d86a369cee956653a49c361b0608b1f57679c12"
+    },
+    {
+      "path": "src/policy.mjs",
+      "bytes": 3962,
+      "sha256": "f5461063d9ca9280312b9ef7a81a80827e7c53a906932698a67386aa90f5870f"
+    },
+    {
+      "path": "src/reference-data.mjs",
+      "bytes": 8122,
+      "sha256": "19d3d95f2885cbe8877f4d94945fc27310aebdf7937b40744e98886edd2f23de"
+    },
+    {
+      "path": "src/self-test.mjs",
+      "bytes": 2791,
+      "sha256": "09351a98c6dafcfe7c11cb827f45f97fb6996276b316f003fc8448316fa61111"
+    },
+    {
+      "path": "src/server.mjs",
+      "bytes": 9239,
+      "sha256": "b68761d8e53a5b4d42745eea54f612065ba0a679ed4c923d2ba9fd70ed706936"
+    },
+    {
+      "path": "src/store.mjs",
+      "bytes": 16432,
+      "sha256": "0fdbaa3659347d2cb8d0e75cbac732dd0f558919228093850843fced36db4411"
+    },
+    {
+      "path": "test/core.test.mjs",
+      "bytes": 5789,
+      "sha256": "988cbf2209ec1a7e008126f63870bd69518108b28ce2247c541b9a63e1b0e888"
+    },
+    {
+      "path": "test/fixtures.mjs",
+      "bytes": 3686,
+      "sha256": "b554a0ecdaa8cf4cd94e7fca7e5bfb061592776f1ad2297195d3ae7d6e0abf0f"
+    },
+    {
+      "path": "test/gemini.test.mjs",
+      "bytes": 1762,
+      "sha256": "5918c823a5e4f407ab89ca59b5b36640a36804cfd1b9b93f624b8b9537d8e06e"
+    },
+    {
+      "path": "test/hunter.test.mjs",
+      "bytes": 6247,
+      "sha256": "a92b0d6efc0416504af3195c7ca3e92154d2cac6483ef70dca36e2b1975d0f0c"
+    },
+    {
+      "path": "test/integration.test.mjs",
+      "bytes": 5505,
+      "sha256": "f3322f5a9184f0c8ae14aa4855523e66a3ac1cc7a693f1919e65e309483e8892"
+    },
+    {
+      "path": "test/reference-data.test.mjs",
+      "bytes": 4464,
+      "sha256": "f7b2143f37e19e53ffcf9f939c4bfd146bf2db7e1b1bd427d95d51103f607b16"
+    },
+    {
+      "path": "test/server.test.mjs",
+      "bytes": 5797,
+      "sha256": "9025c90f8b306c438c6c93e80babd9eed2c64a6bf68215b89d2a3a2af1b23197"
+    },
+    {
+      "path": "test/store.test.mjs",
+      "bytes": 9565,
+      "sha256": "1c5977fa1fad94e19f42a094397b3ed2012df0d8307a8b7688158fb4c55fde5b"
+    },
+    {
+      "path": "test/workflows.test.mjs",
+      "bytes": 4686,
+      "sha256": "8268404a73b1329bbeb045c808a0bf0f0f34c4cc9c16b1da8a6fe86840e141f4"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_00_SELF_TEST.json",
+      "bytes": 21840,
+      "sha256": "dac389d46bfdc7adb6b76fea207cfe4ed276735ccfe0199c0ed06b794bff3637"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_10_CREATE_MISSION.json",
+      "bytes": 4460,
+      "sha256": "9fae092d3d8518cdd4f42956f4adb6d7bda3bc0d8d914826c586d6887937e203"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_20_HUNT_NEXT.json",
+      "bytes": 3463,
+      "sha256": "a76beeb8da60a3ec013b8c35bbfa2e49651ac9f4731a52a8bdb8ee5064934f14"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_21_MISSION_STATUS.json",
+      "bytes": 3920,
+      "sha256": "772eca0333df8a21f3e7807769cef8149465559badce554cb65622465aadddc5"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_22_READ_CANDIDATES.json",
+      "bytes": 3295,
+      "sha256": "d550b3e5dc1f4f3ac29b8e268db1883e40dc1bcea9eaf177d5ca9cb87ae1a7ab"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_23_IMPORT_DNID_REFERENCE.json",
+      "bytes": 6540,
+      "sha256": "7a6416e1fd665252b77b04a63521d8234be9fd974a3606ca9cb7c05160db6cb7"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_25_REVIEW.json",
+      "bytes": 4696,
+      "sha256": "21117364f98d050569b652400d06f6ad71b5e79f998f4c0994b120327db28bb9"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_30_DISPATCH_ALERT.json",
+      "bytes": 8650,
+      "sha256": "2b1a3aa5c98a5c50b94d993317f09a328df1767b0c29c4e4287f5c66b3aa057e"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_MASTER_V1.0.0_READY.json",
+      "bytes": 18938,
+      "sha256": "7c432374ff30f711026d08390e230ce65819f2c84cfa7959e5065fa46addf814"
+    }
+  ]
+}

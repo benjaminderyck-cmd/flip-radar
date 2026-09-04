@@ -29,7 +29,7 @@ export function runOfflineSelfTest(){
   });
   const example=evaluateAssessment(goodAssessment(),{now:NOW});
   checks.push({name:'Calcul monetaire en centimes',expected:71.32,actual:example.best.estimated_contribution_eur,ok:example.best.estimated_contribution_eur===71.32});
-  const output={project:'FLIP RADAR',version:'0.1.0',mode:'offline',all_ok:checks.every(x=>x.ok),tests_total:checks.length,
+  const output={project:'FLIP RADAR',version:'0.2.0',mode:'offline',all_ok:checks.every(x=>x.ok),tests_total:checks.length,
     external_calls:0,telegram_sent:0,purchases_executed:0,
     warning:'DONNEES FICTIVES. Aucun tarif reel, aucune annonce reelle, aucun gain promis.',
     fixture_date:NOW,checks,example};

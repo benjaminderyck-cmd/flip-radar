@@ -1,0 +1,218 @@
+{
+  "project": "FLIP RADAR",
+  "version": "0.2.0",
+  "mode": "offline",
+  "all_ok": true,
+  "tests_total": 19,
+  "external_calls": 0,
+  "telegram_sent": 0,
+  "purchases_executed": 0,
+  "warning": "DONNEES FICTIVES. Aucun tarif reel, aucune annonce reelle, aucun gain promis.",
+  "fixture_date": "2026-09-03T12:00:00.000Z",
+  "checks": [
+    {
+      "name": "Marge et demande suffisantes",
+      "expected": "GO",
+      "actual": "GO",
+      "ok": true
+    },
+    {
+      "name": "Transport inconnu",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Provision entreprise inconnue",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Annonces disparues, pas ventes",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Prix demandes, pas prix vendus",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Preuve inventee par un LLM",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Comparables autre modele",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Comparables autre etat",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Favoris sans preuve de demande",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Forte saturation",
+      "expected": "SURVEILLER",
+      "actual": "SURVEILLER",
+      "ok": true
+    },
+    {
+      "name": "Risque trop eleve",
+      "expected": "NON",
+      "actual": "NON",
+      "ok": true
+    },
+    {
+      "name": "Contrefacon signalee",
+      "expected": "NON",
+      "actual": "NON",
+      "ok": true
+    },
+    {
+      "name": "Transport annule la marge",
+      "expected": "NON",
+      "actual": "NON",
+      "ok": true
+    },
+    {
+      "name": "Disponibilite inconnue",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Identite produit incertaine",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Taux GBP EUR absent",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Prix eleve autorise si preuves suffisantes",
+      "expected": "GO",
+      "actual": "GO",
+      "ok": true
+    },
+    {
+      "name": "Comparables repetes ne renforcent pas la preuve",
+      "expected": "REVUE",
+      "actual": "REVUE",
+      "ok": true
+    },
+    {
+      "name": "Calcul monetaire en centimes",
+      "expected": 71.32,
+      "actual": 71.32,
+      "ok": true
+    }
+  ],
+  "example": {
+    "rule_version": "foundation-0.2.0",
+    "thresholds_provisional": true,
+    "simulated": true,
+    "verdict": "SIMULATION",
+    "would_verdict": "GO",
+    "notification_allowed": false,
+    "reasons": [],
+    "listing_url": "https://market.example/item/fixture-one",
+    "title": "[FICTIF] Objet de test modèle A",
+    "best": {
+      "channel": "vinted",
+      "country": "FR",
+      "verdict": "GO",
+      "reasons": [],
+      "all_in_eur": 110,
+      "conservative_gross_eur": 214,
+      "conservative_net_eur": 181.32,
+      "estimated_contribution_eur": 71.32,
+      "roi": 0.648,
+      "historical_median_days": 10,
+      "demand": {
+        "score": 96,
+        "median_days": 10,
+        "verified_sold_count": 45,
+        "window_days": 30,
+        "active_count": 20,
+        "saturation_proxy": 31,
+        "method": "heuristic_v1_not_probability",
+        "reasons": []
+      },
+      "required_comps": 5,
+      "accepted_comps": 10,
+      "rejected_comps": [],
+      "evidence_links": [
+        "https://sold.example/item/0",
+        "https://sold.example/item/1",
+        "https://sold.example/item/2",
+        "https://sold.example/item/3",
+        "https://sold.example/item/4",
+        "https://sold.example/item/5",
+        "https://sold.example/item/6",
+        "https://sold.example/item/7",
+        "https://sold.example/item/8",
+        "https://sold.example/item/9"
+      ],
+      "eur_per_holding_day": 7.13
+    },
+    "quotes": [
+      {
+        "channel": "vinted",
+        "country": "FR",
+        "verdict": "GO",
+        "reasons": [],
+        "all_in_eur": 110,
+        "conservative_gross_eur": 214,
+        "conservative_net_eur": 181.32,
+        "estimated_contribution_eur": 71.32,
+        "roi": 0.648,
+        "historical_median_days": 10,
+        "demand": {
+          "score": 96,
+          "median_days": 10,
+          "verified_sold_count": 45,
+          "window_days": 30,
+          "active_count": 20,
+          "saturation_proxy": 31,
+          "method": "heuristic_v1_not_probability",
+          "reasons": []
+        },
+        "required_comps": 5,
+        "accepted_comps": 10,
+        "rejected_comps": [],
+        "evidence_links": [
+          "https://sold.example/item/0",
+          "https://sold.example/item/1",
+          "https://sold.example/item/2",
+          "https://sold.example/item/3",
+          "https://sold.example/item/4",
+          "https://sold.example/item/5",
+          "https://sold.example/item/6",
+          "https://sold.example/item/7",
+          "https://sold.example/item/8",
+          "https://sold.example/item/9"
+        ],
+        "eur_per_holding_day": 7.13
+      }
+    ],
+    "warning": "Estimation après provisions configurées, pas un bénéfice garanti ni un calcul fiscal définitif."
+  }
+}

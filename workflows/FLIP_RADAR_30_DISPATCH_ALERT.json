@@ -1,0 +1,274 @@
+{
+  "name": "FLIP RADAR 30 - ENVOYER UNE ALERTE",
+  "nodes": [
+    {
+      "id": "c034c1c5-2bab-470d-a406-03ccda04f83a",
+      "name": "A lire avant execution",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -290
+      ],
+      "parameters": {
+        "content": "## Envoi reel, desactive par defaut\nConfigurer chat_id + credentials WORKER et Telegram.\nFLIP_RADAR_ALERTS_ENABLED=true requis cote worker. Une alerte maximum par execution.\nEn cas de doute apres envoi : verifier Telegram, ne pas relancer le noeud Telegram seul.\nAucun renvoi automatique des livraisons incertaines.",
+        "width": 640,
+        "height": 230
+      }
+    },
+    {
+      "id": "89a540d4-bbcc-4028-a05e-b58681b3f053",
+      "name": "Demarrage manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b332c349-2d5e-410a-a18e-b6d8b0dcd689",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Modifier uniquement ces parametres NON SECRETS.\nconst worker_url = 'https://YOUR-FLIP-RADAR-WORKER';\nconst chat_id = 'YOUR_TELEGRAM_CHAT_ID';\nconst mission_id = 'YOUR_MISSION_UUID';\nconst listing_id = 'YOUR_LISTING_UUID';\nif(worker_url.includes('YOUR-'))throw new Error('CONFIGURER_URL_WORKER_AVANT_EXECUTION');\n// URL is not a global in all n8n runners. Only accept an HTTPS DNS origin here.\nif(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');\nreturn [{json:{worker_url:worker_url.replace(/\\/$/,''),chat_id,mission_id,listing_id}}];"
+      }
+    },
+    {
+      "id": "fa0a8c6e-f644-4432-abce-9c654ecb98ae",
+      "name": "Verifier destination",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const c=$input.first().json;if(!/^-?[0-9]+$/.test(c.chat_id))throw new Error('CONFIGURER_CHAT_TELEGRAM');return [{json:c}];"
+      }
+    },
+    {
+      "id": "f54dd609-e60a-4f4c-a807-a50fa4ea343e",
+      "name": "Reserver une alerte",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/alerts/claim' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    },
+    {
+      "id": "aade96ec-ab96-4a4e-a4c5-7cd9b15689a7",
+      "name": "Garder seulement une alerte reelle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const response=$input.first().json;\nif(response.status==='idle'||response.status==='disabled')return [];\nif(response.status!=='claimed'||!response.alert?.id||!response.alert?.claim_token||typeof response.alert?.text!=='string')throw new Error('INVALID_ALERT_CLAIM');\nconst config=$('Configuration').first().json;\nif(!/^-?[0-9]+$/.test(config.chat_id))throw new Error('CONFIGURER_CHAT_TELEGRAM');\nconst text=response.alert.text;\nif(!text.startsWith('FLIP RADAR — GO\\n')||text.includes('[SIMULATION]'))throw new Error('SIMULATION_OR_NON_GO_BLOCKED');\n// The Telegram node uses HTML parsing. Escape EVERY character with HTML semantics.\nconst escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\nreturn [{json:{...response.alert,chat_id:config.chat_id,escaped_text:escaped}}];"
+      }
+    },
+    {
+      "id": "acdd1e73-4125-4341-a04c-0efbabdcc4c4",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        0
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.escaped_text }}",
+        "replyMarkup": "none",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false,
+          "disable_web_page_preview": true
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir ton credential Telegram. Pas de Retry On Fail : une livraison incertaine demande une verification manuelle."
+    },
+    {
+      "id": "41349486-9aed-4e23-a15e-cf1849be3766",
+      "name": "Preparer confirmation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const response=$input.first().json;const message_id=response.message_id??response.result?.message_id;if(!Number.isInteger(message_id)||message_id<=0)throw new Error('TELEGRAM_MESSAGE_ID_REQUIRED');const claim=$('Garder seulement une alerte reelle').first().json;return [{json:{id:claim.id,claim_token:claim.claim_token,message_id}}];"
+      }
+    },
+    {
+      "id": "1cb55104-e2a7-4ece-a231-b606f60c1771",
+      "name": "Confirmer la livraison",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/alerts/ack' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    }
+  ],
+  "connections": {
+    "Demarrage manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Verifier destination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifier destination": {
+      "main": [
+        [
+          {
+            "node": "Reserver une alerte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reserver une alerte": {
+      "main": [
+        [
+          {
+            "node": "Garder seulement une alerte reelle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Garder seulement une alerte reelle": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Preparer confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparer confirmation": {
+      "main": [
+        [
+          {
+            "node": "Confirmer la livraison",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

@@ -1,0 +1,139 @@
+{
+  "name": "FLIP RADAR 25 - REVUE HUMAINE",
+  "nodes": [
+    {
+      "id": "c034c1c5-2bab-470d-a406-03ccda04f83a",
+      "name": "A lire avant execution",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -290
+      ],
+      "parameters": {
+        "content": "## Validation privee\nLe credential REVIEW est reserve a toi, pas au LLM.\nRenseigner frais, ventes confirmees, demande et risques avec leurs preuves.\nExemple de structure dans le pack. review_ready reste false par defaut.\nGO signifie candidat documente a examiner ; aucun achat execute.",
+        "width": 640,
+        "height": 230
+      }
+    },
+    {
+      "id": "89a540d4-bbcc-4028-a05e-b58681b3f053",
+      "name": "Demarrage manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b332c349-2d5e-410a-a18e-b6d8b0dcd689",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Modifier uniquement ces parametres NON SECRETS.\nconst worker_url = 'https://YOUR-FLIP-RADAR-WORKER';\nconst chat_id = 'YOUR_TELEGRAM_CHAT_ID';\nconst mission_id = 'YOUR_MISSION_UUID';\nconst listing_id = 'YOUR_LISTING_UUID';\nif(worker_url.includes('YOUR-'))throw new Error('CONFIGURER_URL_WORKER_AVANT_EXECUTION');\n// URL is not a global in all n8n runners. Only accept an HTTPS DNS origin here.\nif(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');\nreturn [{json:{worker_url:worker_url.replace(/\\/$/,''),chat_id,mission_id,listing_id}}];"
+      }
+    },
+    {
+      "id": "36e3d23d-f833-485c-a083-9f00607d18a2",
+      "name": "Saisir les preuves",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// A completer avec des preuves REELLES. Jamais avec les donnees du SELF TEST.\nconst review_ready=false;\nconst c=$('Configuration').first().json;\nif(!review_ready)throw new Error('PREUVES_REELLES_A_RENSEIGNER');\nif(!/^[0-9a-f-]{36}$/i.test(c.listing_id))throw new Error('CONFIGURER_LISTING_UUID');\n// Voir config/review.template.json et docs/DATA_CONTRACT.md dans le pack.\nconst evidence={listing_updates:{},quotes:[],risk:null,fx:{}};\nif(!evidence.quotes.length||evidence.risk?.reviewed_by!=='human')throw new Error('PREUVES_INCOMPLETES');\nreturn [{json:{request_key:'n8n-review-'+$execution.id,listing_id:c.listing_id,...evidence}}];"
+      }
+    },
+    {
+      "id": "30a8d2a7-45f2-490d-a89e-f91df1d222aa",
+      "name": "Enregistrer revue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/reviews' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Credential Header Auth FLIP_RADAR_REVIEW obligatoire, distinct du WORKER. Les autres workflows ne doivent pas y avoir acces."
+    }
+  ],
+  "connections": {
+    "Demarrage manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Saisir les preuves",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Saisir les preuves": {
+      "main": [
+        [
+          {
+            "node": "Enregistrer revue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

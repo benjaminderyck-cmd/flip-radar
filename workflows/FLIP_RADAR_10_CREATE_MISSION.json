@@ -1,0 +1,139 @@
+{
+  "name": "FLIP RADAR 10 - CREER MISSION",
+  "nodes": [
+    {
+      "id": "c034c1c5-2bab-470d-a406-03ccda04f83a",
+      "name": "A lire avant execution",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -290
+      ],
+      "parameters": {
+        "content": "## Creation seulement\nConfigurer URL worker + credential Header Auth.\nLes pays sont une intention, pas une promesse de couverture.\nCette execution met une mission en attente ; elle ne lance aucun navigateur.\nUn nouvel Execute workflow cree une nouvelle mission. Les retries de la meme execution sont idempotents.",
+        "width": 640,
+        "height": 230
+      }
+    },
+    {
+      "id": "89a540d4-bbcc-4028-a05e-b58681b3f053",
+      "name": "Demarrage manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b332c349-2d5e-410a-a18e-b6d8b0dcd689",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Modifier uniquement ces parametres NON SECRETS.\nconst worker_url = 'https://YOUR-FLIP-RADAR-WORKER';\nconst chat_id = 'YOUR_TELEGRAM_CHAT_ID';\nconst mission_id = 'YOUR_MISSION_UUID';\nconst listing_id = 'YOUR_LISTING_UUID';\nif(worker_url.includes('YOUR-'))throw new Error('CONFIGURER_URL_WORKER_AVANT_EXECUTION');\n// URL is not a global in all n8n runners. Only accept an HTTPS DNS origin here.\nif(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');\nreturn [{json:{worker_url:worker_url.replace(/\\/$/,''),chat_id,mission_id,listing_id}}];"
+      }
+    },
+    {
+      "id": "80452051-6cd1-402e-a59b-dcde1e60b694",
+      "name": "Definir la mission",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{json:{request_key:'n8n-mission-'+$execution.id,mission:{objective:'Chercher des annonces europeennes sous-cotees, reference identifiable, demande a verifier. Explorer plusieurs familles de produits et reformuler les recherches selon les resultats.',countries:['FR','DE','BE','ES','IT','NL','PT','AT','PL','SE','DK','FI','IE','CZ','CH','GB','NO'],languages:['fr','en','de','es','it','nl'],source_ids:[]}}}];"
+      }
+    },
+    {
+      "id": "9399a90d-823a-419d-a270-679b3cf96fd0",
+      "name": "Creer la mission",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/missions' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    }
+  ],
+  "connections": {
+    "Demarrage manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Definir la mission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir la mission": {
+      "main": [
+        [
+          {
+            "node": "Creer la mission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

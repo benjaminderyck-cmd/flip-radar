@@ -65,6 +65,19 @@ export async function buildWorkflows(){
   const listings=workflow('FLIP RADAR 22 - LIRE LES CANDIDATS',[
     manual(),code('Configuration',CONFIG_CODE,240),http('Lire annonces','/v1/listings',{method:'GET'}),
   ],'## Candidats a verifier\nLes 50 dernieres annonces observees, non des achats conseilles.\nLes frais, ventes confirmees et la demande ne sont pas inventes par le navigateur.\nUtiliser ensuite 25 ou POST /v1/reviews pour des preuves verifiees.');
+  const referenceImport=workflow('FLIP RADAR 23 - IMPORTER REFERENCES DNID',[
+    manual(),
+    code('Configuration',`const worker_url='https://flip-radar-production-1c7c.up.railway.app';
+if(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');
+return [{json:{worker_url:worker_url.replace(/\\\/$/,'')}}];`,240),
+    code('Demander import officiel',`return [{json:{request_key:'n8n-dnid-reference-'+$execution.id}}];`,480),
+    {...http('Demarrer import historique','/v1/reference-sales/import',{body:'={{ JSON.stringify($json) }}',x:720}),notes:'Credential Header Auth FLIP_RADAR_REVIEW obligatoire. Import manuel de la ressource officielle DNID uniquement.'},
+    node('Attendre 30 secondes','n8n-nodes-base.wait',1.1,{resume:'timeInterval',amount:30,unit:'seconds'},960),
+    {...http('Lire etat import','',{method:'GET',x:1200,urlExpression:"={{ $('Configuration').first().json.worker_url + '/v1/reference-sales/imports/' + $('Demarrer import historique').first().json.id }}"}),notes:'Credential Header Auth FLIP_RADAR_REVIEW. Si status=running, attendre puis relire le meme import_id ; ne pas relancer un nouvel import.'},
+    code('Expliquer resultat',`const x=$input.first().json;
+if(!['queued','running','completed','failed'].includes(x.status))throw new Error('IMPORT_STATUS_INVALID');
+return [{json:{...x,historical_only:true,eligible_as_current_market_proof:false,warning:'Ventes DNID 2024 : references historiques seulement. Elles ne prouvent ni la demande actuelle ni le prix actuel de revente.'}}];`,1440),
+  ],'## Import officiel, manuel et historique\nExecute seulement apres la migration SQL 002 et avec FLIP_RADAR_REVIEW.\nTelecharge une URL data.gouv.fr exacte et autorisee, puis stocke les adjudications 2024.\nCes lignes servent de references exploratoires : jamais de preuve de demande ou de prix actuel.\nAucun scraping, marketplace, achat, vendeur, Telegram ou activation LIVE.');
   const review=workflow('FLIP RADAR 25 - REVUE HUMAINE',[
     manual(),code('Configuration',CONFIG_CODE,240),
     code('Saisir les preuves',`// A completer avec des preuves REELLES. Jamais avec les donnees du SELF TEST.
@@ -90,13 +103,14 @@ return [{json:{request_key:'n8n-review-'+$execution.id,listing_id:c.listing_id,.
   return [
     ['FLIP_RADAR_00_SELF_TEST.json',offline],['FLIP_RADAR_10_CREATE_MISSION.json',createMission],
     ['FLIP_RADAR_20_HUNT_NEXT.json',hunt],['FLIP_RADAR_21_MISSION_STATUS.json',status],
-    ['FLIP_RADAR_22_READ_CANDIDATES.json',listings],['FLIP_RADAR_25_REVIEW.json',review],
+    ['FLIP_RADAR_22_READ_CANDIDATES.json',listings],['FLIP_RADAR_23_IMPORT_DNID_REFERENCE.json',referenceImport],
+    ['FLIP_RADAR_25_REVIEW.json',review],
     ['FLIP_RADAR_30_DISPATCH_ALERT.json',telegram],
   ];
 }
 export async function writeWorkflows(){
   const dir=new URL('workflows/',root);await mkdir(dir,{recursive:true});
   for(const [name,workflow] of await buildWorkflows())await writeFile(new URL(name,dir),JSON.stringify(workflow,null,2)+'\n');
-  console.log('7 workflows generes, tous inactifs : '+fileURLToPath(dir));
+  console.log('8 workflows generes, tous inactifs : '+fileURLToPath(dir));
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await writeWorkflows();

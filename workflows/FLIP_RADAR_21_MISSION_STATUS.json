@@ -1,0 +1,135 @@
+{
+  "name": "FLIP RADAR 21 - LIRE ETAT MISSION",
+  "nodes": [
+    {
+      "id": "c034c1c5-2bab-470d-a406-03ccda04f83a",
+      "name": "A lire avant execution",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -290
+      ],
+      "parameters": {
+        "content": "## Suivi manuel\nReporter le mission_id retourne par le workflow 20 dans Configuration.\nEtats : queued, running, completed, failed.\nAucune boucle de polling ni activation automatique.",
+        "width": 640,
+        "height": 230
+      }
+    },
+    {
+      "id": "89a540d4-bbcc-4028-a05e-b58681b3f053",
+      "name": "Demarrage manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b332c349-2d5e-410a-a18e-b6d8b0dcd689",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Modifier uniquement ces parametres NON SECRETS.\nconst worker_url = 'https://YOUR-FLIP-RADAR-WORKER';\nconst chat_id = 'YOUR_TELEGRAM_CHAT_ID';\nconst mission_id = 'YOUR_MISSION_UUID';\nconst listing_id = 'YOUR_LISTING_UUID';\nif(worker_url.includes('YOUR-'))throw new Error('CONFIGURER_URL_WORKER_AVANT_EXECUTION');\n// URL is not a global in all n8n runners. Only accept an HTTPS DNS origin here.\nif(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');\nreturn [{json:{worker_url:worker_url.replace(/\\/$/,''),chat_id,mission_id,listing_id}}];"
+      }
+    },
+    {
+      "id": "0e13f243-b646-4d7c-a5ff-6866b074381b",
+      "name": "Verifier identifiant",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const c=$input.first().json;if(!/^[0-9a-f-]{36}$/i.test(c.mission_id))throw new Error('CONFIGURER_MISSION_UUID');return [{json:c}];"
+      }
+    },
+    {
+      "id": "0e0a0fa9-99e5-4958-a9c9-01bfa571a96d",
+      "name": "Lire etat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/missions/' + $json.mission_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Choisir le credential Header Auth FLIP_RADAR_WORKER. Ne pas mettre de secret dans le JSON."
+    }
+  ],
+  "connections": {
+    "Demarrage manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Verifier identifiant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifier identifiant": {
+      "main": [
+        [
+          {
+            "node": "Lire etat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

@@ -1,12 +1,13 @@
 {
   "name": "flip-radar-foundation",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {"node": ">=22"},
   "scripts": {
     "start": "node src/server.mjs",
     "migrate": "node scripts/migrate.mjs",
+    "import:dnid": "node scripts/import-dnid-sales.mjs",
     "seed": "node scripts/import-sources.mjs",
     "build:workflows": "node scripts/build-workflows.mjs",
     "test": "node --test --test-concurrency=1 test/*.test.mjs",

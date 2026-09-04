@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-09-04T01:03:46Z",
+  "source_id": "dnid_sales_2024",
+  "publisher": "Direction Nationale d’Interventions Domaniales",
+  "dataset_url": "https://www.data.gouv.fr/datasets/donnees-de-ventes-annee-2024",
+  "download_url": "https://static.data.gouv.fr/resources/donnees-de-ventes-annee-2024/20260220-111324/opendata.csv",
+  "license": "etalab-2.0",
+  "downloaded_bytes": 12978652,
+  "sha256": "8031f3648d596f1e39373fc2a15e2f70564724f4b5cc39d146159533ac7403a1",
+  "logical_data_rows": 41742,
+  "records_accepted": 36366,
+  "descriptions_derived_from_category_brand_model": 16533,
+  "skipped": {
+    "missing_price": 5180,
+    "invalid": 183,
+    "exact_duplicate": 13
+  },
+  "historical_only": true,
+  "eligible_as_current_market_proof": false,
+  "raw_csv_included_in_package": false,
+  "warning": "Validation ponctuelle du parseur sur la ressource officielle téléchargée. Données 2024, pas une preuve de demande ou de prix actuel."
+}

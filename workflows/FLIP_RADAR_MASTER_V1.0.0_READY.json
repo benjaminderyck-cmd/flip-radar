@@ -1,0 +1,626 @@
+{
+  "name": "FLIP RADAR MASTER V1.0.0 - EUROPE",
+  "nodes": [
+    {
+      "id": "9d3e7124-13d5-4a92-8cd8-0f896041d701",
+      "name": "MODE D'EMPLOI",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -500
+      ],
+      "parameters": {
+        "content": "## FLIP RADAR MASTER V1.0.0\n\n1. Selectionner le credential **Header Auth `FLIP_RADAR_WORKER`** dans chaque noeud HTTP.\n2. Executer d'abord avec le declencheur manuel.\n3. Tant que `FLIP_RADAR_LIVE_ENABLED=false`, le workflow s'arrete volontairement apres le diagnostic.\n4. Le planning de 30 minutes ne fonctionne qu'apres activation manuelle du workflow.\n\nLecture seule : aucun achat, paiement, message vendeur ou publication. Les annonces trouvees restent des candidats a verifier. Une recommandation GO exige ensuite des preuves de ventes et une revue humaine.",
+        "width": 760,
+        "height": 310
+      }
+    },
+    {
+      "id": "a6f30f5b-bb2b-4e9f-93ad-9a32b58f8a01",
+      "name": "Test manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -40
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "f8cc7c71-b681-40ea-8b77-c2bf21dbad02",
+      "name": "Toutes les 30 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        120
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c56af185-6796-40fa-ad36-b88d95f27803",
+      "name": "Configuration Europe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        40
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const worker_url = 'https://flip-radar-production-1c7c.up.railway.app';\nconst countries = ['AL','AD','AT','BE','BA','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE','IT','XK','LV','LI','LT','LU','MT','MD','MC','ME','NL','MK','NO','PL','PT','RO','SM','RS','SK','SI','ES','SE','CH','TR','UA','GB','VA'];\nconst languages = ['fr','en','de','es','it','nl','pt','pl'];\nconst objective = [\n  'Chercher sur les sources europeennes explicitement approuvees des annonces sous-cotees pour achat-revente.',\n  'Explorer toutes les familles de produits autorisees sans plafond fixe de prix achat.',\n  'Prioriser les produits identifiables avec clientele active, rotation rapide, marge nette potentielle et concurrence supportable.',\n  'Varier les requetes, synonymes, langues, fautes courantes, modeles et pays selon les resultats visibles.',\n  'Sauvegarder uniquement les annonces dont le titre et le prix sont visibles et ne jamais inventer ventes, demande, frais ou authenticite.',\n  'Ne jamais acheter, contacter un vendeur, se connecter, contourner un blocage ou remplir un formulaire.'\n].join(' ');\nreturn [{json:{worker_url,countries,languages,objective,started_at:new Date().toISOString()}}];"
+      }
+    },
+    {
+      "id": "35be5415-8249-453c-b984-ac4972034104",
+      "name": "Verifier worker et base",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        40
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration Europe').first().json.worker_url + '/v1/status' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Selectionner ici le credential Header Auth FLIP_RADAR_WORKER."
+    },
+    {
+      "id": "1d3464d1-e207-4bd8-ba8a-153477195105",
+      "name": "Assembler diagnostic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        40
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const config=$('Configuration Europe').first().json;\nconst status=$input.first().json;\nreturn [{json:{...config,worker_status:status,ready:status.database==='ready'&&status.live_enabled===true}}];"
+      }
+    },
+    {
+      "id": "e9dbfc12-72a7-4f42-9a7f-a5dfab0b6906",
+      "name": "Recherche LIVE active",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        40
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b301e43-51a8-4145-8ec3-7444ee1a8607",
+              "leftValue": "={{ $json.ready }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "534d71bd-2b93-49f2-badb-20e781c97f08",
+      "name": "Arret sur configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        210
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const x=$input.first().json;\nreturn [{json:{project:'FLIP RADAR',workflow_version:'1.0.0',status:'CONFIGURATION_REQUIRED',database:x.worker_status.database,live_enabled:x.worker_status.live_enabled,alerts_enabled:x.worker_status.alerts_enabled,busy:x.worker_status.busy,marketplace_calls_started:0,purchases_executed:0,message:'Connexion worker et base validee. La recherche reelle reste volontairement arretee tant que LIVE est desactive ou que les sources et le modele ne sont pas prets.'}}];"
+      }
+    },
+    {
+      "id": "22e6b457-c2d9-4fc8-87fa-ce3f5ba13c09",
+      "name": "Definir mission rentable",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -70
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const c=$input.first().json;\nreturn [{json:{request_key:'flip-radar-master-'+$execution.id,mission:{objective:c.objective,countries:c.countries,languages:c.languages,source_ids:[]}}}];"
+      }
+    },
+    {
+      "id": "f0aa4991-bfeb-43d5-a55f-41c59d885710",
+      "name": "Creer mission",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1530,
+        -70
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration Europe').first().json.worker_url + '/v1/missions' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Selectionner ici le credential Header Auth FLIP_RADAR_WORKER."
+    },
+    {
+      "id": "4fe454b4-c4d2-4b9e-8815-d510b694ce11",
+      "name": "Lancer Web Hunter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1780,
+        -70
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration Europe').first().json.worker_url + '/v1/runs/next' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Selectionner ici le credential Header Auth FLIP_RADAR_WORKER."
+    },
+    {
+      "id": "04731766-198a-42b8-bb7c-5a33dddc1412",
+      "name": "Normaliser lancement",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2030,
+        -70
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const launch=$input.first().json;\nconst created=$('Creer mission').first().json;\nconst mission_id=launch.mission_id||created.id;\nif(!/^[0-9a-f-]{36}$/i.test(mission_id||''))throw new Error('MISSION_UUID_ABSENT');\nreturn [{json:{launch_status:launch.status||'unknown',mission_id,created_mission_id:created.id,started:launch.status==='started'}}];"
+      }
+    },
+    {
+      "id": "3c064182-257f-422d-95e9-1ec6b3c8d713",
+      "name": "Mission demarree",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2280,
+        -70
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c97b7d7-b9d2-4629-91a2-bf5a034a5e14",
+              "leftValue": "={{ $json.started }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "ba386df1-d65d-4e1e-8455-cf4274663714",
+      "name": "Worker occupe ou vide",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2530,
+        100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const x=$input.first().json;\nreturn [{json:{project:'FLIP RADAR',workflow_version:'1.0.0',status:x.launch_status,created_mission_id:x.created_mission_id,purchases_executed:0,message:x.launch_status==='busy'?'Le worker traite deja une mission. La nouvelle mission reste en file attente.':'Aucune mission lancee pendant cette execution.'}}];"
+      }
+    },
+    {
+      "id": "999d5a06-a837-44e1-91c9-ad3cbc5ef115",
+      "name": "Attendre analyse maximum",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "e3362d80-2f03-4c0f-bacc-226954215115",
+      "position": [
+        2530,
+        -150
+      ],
+      "parameters": {
+        "amount": 195
+      }
+    },
+    {
+      "id": "f8d43875-57a6-4ac5-bdf9-0a1323f93616",
+      "name": "Lire etat final",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2780,
+        -150
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration Europe').first().json.worker_url + '/v1/missions/' + $('Normaliser lancement').first().json.mission_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Selectionner ici le credential Header Auth FLIP_RADAR_WORKER."
+    },
+    {
+      "id": "33540343-b6d9-4ad0-8e51-7397258e2317",
+      "name": "Lire annonces",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3030,
+        -150
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration Europe').first().json.worker_url + '/v1/listings' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Selectionner ici le credential Header Auth FLIP_RADAR_WORKER."
+    },
+    {
+      "id": "47c4f506-c2e6-457f-9a31-3fb3e6d41418",
+      "name": "Lire opportunites",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3280,
+        -150
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration Europe').first().json.worker_url + '/v1/opportunities' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Selectionner ici le credential Header Auth FLIP_RADAR_WORKER."
+    },
+    {
+      "id": "7e4fd52b-7acc-4ee0-a1f8-d4b59a03a719",
+      "name": "Rapport final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3530,
+        -150
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const mission=$('Lire etat final').first().json;\nconst listings=$('Lire annonces').first().json.listings||[];\nconst opportunities=$input.first().json.opportunities||[];\nconst startedAt=Date.parse($('Configuration Europe').first().json.started_at);\nconst fresh=listings.filter(x=>Date.parse(x.observed_at)>=startedAt);\nconst counts={GO:0,REVUE:0,SURVEILLER:0,NON:0};\nfor(const o of opportunities)if(Object.hasOwn(counts,o.verdict))counts[o.verdict]++;\nreturn [{json:{project:'FLIP RADAR',workflow_version:'1.0.0',worker:'online',mission,raw_candidates_total:listings.length,raw_candidates_this_execution:fresh.length,opportunities_total:opportunities.length,verdicts:counts,latest_candidates:listings.slice(0,20),latest_opportunities:opportunities.slice(0,20),human_validation_required:true,purchases_executed:0,seller_messages_sent:0,warning:'Une annonce brute ou un score ne garantit ni revente ni benefice. Verifier etat, authenticite, disponibilite, frais et preuves avant tout achat manuel.'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Test manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration Europe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toutes les 30 minutes": {
+      "main": [
+        [
+          {
+            "node": "Configuration Europe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration Europe": {
+      "main": [
+        [
+          {
+            "node": "Verifier worker et base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifier worker et base": {
+      "main": [
+        [
+          {
+            "node": "Assembler diagnostic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assembler diagnostic": {
+      "main": [
+        [
+          {
+            "node": "Recherche LIVE active",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recherche LIVE active": {
+      "main": [
+        [
+          {
+            "node": "Definir mission rentable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Arret sur configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir mission rentable": {
+      "main": [
+        [
+          {
+            "node": "Creer mission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creer mission": {
+      "main": [
+        [
+          {
+            "node": "Lancer Web Hunter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lancer Web Hunter": {
+      "main": [
+        [
+          {
+            "node": "Normaliser lancement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliser lancement": {
+      "main": [
+        [
+          {
+            "node": "Mission demarree",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mission demarree": {
+      "main": [
+        [
+          {
+            "node": "Attendre analyse maximum",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Worker occupe ou vide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendre analyse maximum": {
+      "main": [
+        [
+          {
+            "node": "Lire etat final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire etat final": {
+      "main": [
+        [
+          {
+            "node": "Lire annonces",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire annonces": {
+      "main": [
+        [
+          {
+            "node": "Lire opportunites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire opportunites": {
+      "main": [
+        [
+          {
+            "node": "Rapport final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

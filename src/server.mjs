@@ -7,6 +7,7 @@ import {runHunter} from './hunter.mjs';
 import {assertSource} from './policy.mjs';
 import {GeminiPlanner} from './gemini.mjs';
 import {PlaywrightBrowser} from './playwright-browser.mjs';
+import {importDnidReferenceSales} from './reference-data.mjs';
 
 export function loadConfig(env=process.env) {
   const workerToken=env.FLIP_RADAR_WORKER_TOKEN, reviewToken=env.FLIP_RADAR_REVIEW_TOKEN;
@@ -36,8 +37,9 @@ async function readJson(req) {
   return data;
 }
 export function buildServer({store,config,browserFactory=()=>new PlaywrightBrowser({vision:config.vision}),
-  modelFactory=()=>new GeminiPlanner({apiKey:config.apiKey,model:config.model,maxOutputTokens:config.maxOutputTokens})}) {
-  const jobs=new Set(),controllers=new Set();let busy=false;
+  modelFactory=()=>new GeminiPlanner({apiKey:config.apiKey,model:config.model,maxOutputTokens:config.maxOutputTokens}),
+  referenceImporter=()=>importDnidReferenceSales({store})}) {
+  const jobs=new Set(),controllers=new Set();let busy=false,referenceBusy=false;
   async function nextRun() {
     if(!config.liveEnabled)throw new Error('LIVE_DISABLED');
     if(busy)return {status:'busy'};
@@ -64,17 +66,38 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
       return {status:'started',mission_id:claim.id};
     }catch(error){busy=false;throw error;}
   }
+  async function startReferenceImport(importId) {
+    if(referenceBusy)throw new Error('REFERENCE_IMPORT_BUSY');
+    const claim=await store.startReferenceImport(importId);
+    if(!claim)return {status:'already_started',import_id:importId};
+    referenceBusy=true;
+    const job=(async()=>{
+      try{await store.finishReferenceImport(importId,await referenceImporter());}
+      catch(error){await store.failReferenceImport(importId,publicError(error));}
+      finally{referenceBusy=false;}
+    })();
+    jobs.add(job);job.then(()=>jobs.delete(job),()=>{jobs.delete(job);console.error('FLIP_RADAR_REFERENCE_IMPORT_PERSISTENCE_ERROR');});
+    return {status:'started',import_id:importId};
+  }
   const server=createServer(async(req,res)=>{
     try{
-      const path=new URL(req.url,'http://localhost').pathname;
-      if(req.method==='GET'&&path==='/health')return send(res,200,{service:'flip-radar',version:'0.1.0',status:'up'});
+      const requestUrl=new URL(req.url,'http://localhost'),path=requestUrl.pathname;
+      if(req.method==='GET'&&path==='/health')return send(res,200,{service:'flip-radar',version:'0.2.0',status:'up'});
       const who=role(req,config);
       if(!who)return send(res,401,{error:'UNAUTHORIZED'});
       if(req.method==='GET'&&path==='/v1/status'){
-        await store.health();return send(res,200,{database:'ready',live_enabled:config.liveEnabled,alerts_enabled:config.alertsEnabled,busy});
+        await store.health();return send(res,200,{database:'ready',live_enabled:config.liveEnabled,alerts_enabled:config.alertsEnabled,busy,reference_import_busy:referenceBusy});
       }
       if(req.method==='GET'&&path==='/v1/listings')return send(res,200,{listings:await store.listings()});
       if(req.method==='GET'&&path==='/v1/opportunities')return send(res,200,{opportunities:await store.opportunities()});
+      if(req.method==='GET'&&path==='/v1/reference-sales'){
+        const allowed=new Set(['q','brand','model','category','limit']);
+        if([...requestUrl.searchParams.keys()].some(name=>!allowed.has(name)))throw new Error('REFERENCE_QUERY_INVALID');
+        return send(res,200,await store.referenceSales(Object.fromEntries(requestUrl.searchParams)));
+      }
+      if(req.method==='GET'&&path.startsWith('/v1/reference-sales/imports/')){
+        const item=await store.referenceImport(path.split('/').at(-1));return send(res,item?200:404,item||{error:'NOT_FOUND'});
+      }
       if(req.method==='GET'&&path.startsWith('/v1/missions/')){
         const mission=await store.mission(path.split('/').at(-1));return send(res,mission?200:404,mission||{error:'NOT_FOUND'});
       }
@@ -82,6 +105,11 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
       const body=await readJson(req);
       if(path==='/v1/missions')return send(res,201,await store.createMission(body));
       if(path==='/v1/runs/next')return send(res,202,await nextRun());
+      if(path==='/v1/reference-sales/import'){
+        if(who!=='reviewer')return send(res,403,{error:'REVIEWER_REQUIRED'});
+        const item=await store.createReferenceImport(body),start=item.status==='queued'?await startReferenceImport(item.id):{status:item.status,import_id:item.id};
+        return send(res,202,{...item,run_status:start.status});
+      }
       if(path==='/v1/reviews'){
         if(who!=='reviewer')return send(res,403,{error:'REVIEWER_REQUIRED'});
         return send(res,200,await store.review(body,{alertsEnabled:config.alertsEnabled}));
@@ -98,7 +126,7 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
       return send(res,404,{error:'NOT_FOUND'});
     }catch(error){
       const code=publicError(error);
-      const status=code==='BODY_TOO_LARGE'?413:code==='IDEMPOTENCY_CONFLICT'?409:
+      const status=code==='BODY_TOO_LARGE'?413:/IDEMPOTENCY_CONFLICT|_BUSY$/.test(code)?409:
         /DISABLED|CONFIG_REQUIRED|NO_APPROVED|POLICY_UNREVIEWED/.test(code)?503:code==='INTERNAL_ERROR'?500:400;
       send(res,status,{error:code});
     }
