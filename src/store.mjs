@@ -35,6 +35,22 @@ export class PgStore {
     return true;
   }
   async sources() {return (await this.pool.query('SELECT config FROM flip_radar.sources ORDER BY id')).rows.map(r=>r.config);}
+  async upsertPendingSources(sources) {
+    if(!Array.isArray(sources)||!sources.length||sources.length>100
+      ||sources.some(s=>s?.enabled!==false||s?.status==='approved'))throw new Error('SOURCE_CATALOG_PENDING_ONLY');
+    let registered=0,preservedApproved=0;
+    await this.tx(async c=>{
+      for(const source of sources){
+        const result=await c.query(`INSERT INTO flip_radar.sources(id,config) VALUES($1,$2::jsonb)
+          ON CONFLICT(id) DO UPDATE SET config=EXCLUDED.config,updated_at=now()
+          WHERE COALESCE(flip_radar.sources.config->>'status','')<>'approved'
+            AND COALESCE((flip_radar.sources.config->>'enabled')::boolean,false)=false
+          RETURNING id`,[source.id,JSON.stringify(source)]);
+        if(result.rowCount)registered++;else preservedApproved++;
+      }
+    });
+    return {registered,preserved_approved:preservedApproved};
+  }
   async createReferenceImport(request) {
     key(request?.request_key);
     const sourceId='dnid_sales_2024';

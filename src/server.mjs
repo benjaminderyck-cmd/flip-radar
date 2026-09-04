@@ -8,6 +8,7 @@ import {assertSource} from './policy.mjs';
 import {GeminiPlanner} from './gemini.mjs';
 import {PlaywrightBrowser} from './playwright-browser.mjs';
 import {importDnidReferenceSales} from './reference-data.mjs';
+import {loadBundledSourceCatalog,summarizeSourceCatalog} from './source-catalog.mjs';
 
 export function loadConfig(env=process.env) {
   const workerToken=env.FLIP_RADAR_WORKER_TOKEN, reviewToken=env.FLIP_RADAR_REVIEW_TOKEN;
@@ -38,7 +39,7 @@ async function readJson(req) {
 }
 export function buildServer({store,config,browserFactory=()=>new PlaywrightBrowser({vision:config.vision}),
   modelFactory=()=>new GeminiPlanner({apiKey:config.apiKey,model:config.model,maxOutputTokens:config.maxOutputTokens}),
-  referenceImporter=()=>importDnidReferenceSales({store})}) {
+  referenceImporter=()=>importDnidReferenceSales({store}),sourceCatalogLoader=loadBundledSourceCatalog}) {
   const jobs=new Set(),controllers=new Set();let busy=false,referenceBusy=false;
   async function nextRun() {
     if(!config.liveEnabled)throw new Error('LIVE_DISABLED');
@@ -82,7 +83,7 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
   const server=createServer(async(req,res)=>{
     try{
       const requestUrl=new URL(req.url,'http://localhost'),path=requestUrl.pathname;
-      if(req.method==='GET'&&path==='/health')return send(res,200,{service:'flip-radar',version:'0.3.0',status:'up'});
+      if(req.method==='GET'&&path==='/health')return send(res,200,{service:'flip-radar',version:'0.4.0',status:'up'});
       const who=role(req,config);
       if(!who)return send(res,401,{error:'UNAUTHORIZED'});
       if(req.method==='GET'&&path==='/v1/status'){
@@ -93,7 +94,15 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
         const modelConfigured=Boolean(config.apiKey&&config.model);
         return send(res,200,{database:'ready',live_enabled:config.liveEnabled,alerts_enabled:config.alertsEnabled,
           model_configured:modelConfigured,approved_source_count:approvedSourceCount,
+          registered_source_count:sources.length,pending_source_count:sources.length-approvedSourceCount,
           hunter_ready:config.liveEnabled&&modelConfigured&&approvedSourceCount>0,busy,reference_import_busy:referenceBusy});
+      }
+      if(req.method==='GET'&&path==='/v1/sources'){
+        const sources=await store.sources();
+        return send(res,200,{...summarizeSourceCatalog(sources),sources:sources.map(source=>({id:source.id,label:source.label,
+          enabled:source.enabled===true,status:source.status,access_method:source.access_method||'browser_review_required',
+          countries:Array.isArray(source.countries)?source.countries:[],priority:Number(source.priority)||0,
+          credentials_required:Array.isArray(source.credential_env)&&source.credential_env.length>0}))});
       }
       if(req.method==='GET'&&path==='/v1/listings')return send(res,200,{listings:await store.listings()});
       if(req.method==='GET'&&path==='/v1/opportunities')return send(res,200,{opportunities:await store.opportunities()});
@@ -121,6 +130,12 @@ export function buildServer({store,config,browserFactory=()=>new PlaywrightBrows
         if(who!=='reviewer')return send(res,403,{error:'REVIEWER_REQUIRED'});
         const item=await store.createReferenceImport(body),start=item.status==='queued'?await startReferenceImport(item.id):{status:item.status,import_id:item.id};
         return send(res,202,{...item,run_status:start.status});
+      }
+      if(path==='/v1/sources/catalog/import'){
+        if(who!=='reviewer')return send(res,403,{error:'REVIEWER_REQUIRED'});
+        if(body.confirm_pending_only!==true)throw new Error('SOURCE_CATALOG_CONFIRMATION_REQUIRED');
+        const sources=await sourceCatalogLoader(),result=await store.upsertPendingSources(sources);
+        return send(res,200,{status:'CATALOG_REGISTERED_NOT_ENABLED',...result,...summarizeSourceCatalog(sources)});
       }
       if(path==='/v1/reviews'){
         if(who!=='reviewer')return send(res,403,{error:'REVIEWER_REQUIRED'});

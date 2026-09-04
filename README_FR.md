@@ -1,8 +1,21 @@
-# FLIP RADAR — worker 0.3
+# FLIP RADAR — worker 0.4
 
 Un socle exécutable pour rechercher des objets à revendre en Europe, avec n8n, un navigateur piloté par IA et une base PostgreSQL isolée.
 
-**État exact : le worker 0.2 fonctionne sur Railway avec 36 366 adjudications historiques importées ; cette mise à jour 0.3 est prête à déployer.** La connexion n8n → Railway → Supabase a été validée. Les sources d'annonces actives, les recherches LIVE et les alertes restent désactivées. Aucun achat, paiement, message vendeur ou publication n'est automatisé.
+**État exact : le worker 0.3 fonctionne sur Railway, le workflow 24 a produit son plan et 36 366 adjudications historiques sont disponibles ; cette mise à jour 0.4 est prête à déployer.** Elle ajoute un catalogue de 23 sources européennes, toutes désactivées par construction. Les recherches LIVE et les alertes restent désactivées. Aucun achat, paiement, message vendeur ou publication n'est automatisé.
+
+## Mise à jour 0.4 depuis la version 0.3
+
+1. Aucune nouvelle migration SQL.
+2. Remplacer les fichiers du dépôt GitHub par ceux de ce pack, sans supprimer `config/supabase-ca.crt`.
+3. Attendre Railway puis vérifier `/health` : `"version":"0.4.0"` et `"status":"up"`.
+4. Importer `workflows/FLIP_RADAR_26_REGISTER_EUROPE_SOURCES.json` dans n8n, sans l'activer.
+5. Choisir le credential `FLIP_RADAR_REVIEW` sur le nœud d'enregistrement et un credential worker ou review sur le nœud de lecture.
+6. Exécuter une fois. Le résultat attendu est `CATALOG_READY_SOURCES_STILL_DISABLED`.
+
+Le catalogue prépare cinq interfaces officielles — eBay, Etsy, Reverb, Discogs et BrickLink — et dix-huit marketplaces susceptibles d'être parcourues après une revue spécifique : Leboncoin, Vinted, Wallapop, Kleinanzeigen, Marktplaats, 2dehands, Subito, OLX Pologne, Willhaben, Tradera, FINN, Ricardo, Tutti, Anibis, DoneDeal, Gumtree, Catawiki et Delcampe. Les noms d'environnement nécessaires sont enregistrés, jamais les clés elles-mêmes.
+
+L'import ne peut activer aucune source et ne remplace pas une source déjà approuvée. `pending_credentials` signifie qu'une application officielle reste à créer ; `pending_adapter` qu'un connecteur doit être terminé ; `pending_policy_review` qu'aucune navigation automatisée n'est encore autorisée. Le premier connecteur prioritaire est eBay Browse API, qui couvre plusieurs pays et catégories avec une interface officielle de recherche d'annonces actives.
 
 ## Mise à jour 0.3 depuis la version 0.2
 
@@ -45,17 +58,17 @@ Ce workflow n'a besoin d'aucune clé, ne consulte aucun site et ne touche aucune
 | Identification | Référence produit, état supposé, titre et prix accompagnés d'extraits | Hypothèses de l'IA, jamais validation d'authenticité |
 | Demande | Score fondé sur ventes confirmées, offre concurrente et délais historiques | Données vérifiées à fournir ; favoris et annonces disparues insuffisants |
 | Rentabilité | Coût d'achat complet, revente prudente, frais et provisions, marge et rotation | Estimation, pas bénéfice garanti ni calcul fiscal définitif |
-| Base | Missions, annonces, références historiques, revues, opportunités, alertes et décisions | La migration 002 doit encore être exécutée sur ta base distante |
+| Base | Missions, annonces, références historiques, revues, opportunités, alertes et décisions | Migrations 001 et 002 déjà installées sur la base actuelle |
 | Alertes | Une opportunité GO par exécution, déduplication, confirmation d'envoi | Telegram à connecter ; aucune notification envoyée pendant la construction |
 
 Vinted, Leboncoin et `own_site` sont des **destinations de calcul**, pas des connecteurs de publication déjà autorisés. Le site de vente n'est pas créé dans cette version. Il n'y a pas encore de découverte automatique de nouveaux domaines, de collecte automatique de ventes confirmées, d'apprentissage sur tes ventes ou de flotte multi-workers testée en charge.
 
 ## Organisation du pack
 
-- `workflows/` : neuf workflows générés, tous inactifs et à déclenchement manuel, plus le master Europe déjà configuré.
+- `workflows/` : dix workflows générés, tous inactifs et à déclenchement manuel, plus le master Europe déjà configuré.
 - `sql/001_foundation.sql` et `sql/002_reference_sales.sql` : schéma privé `flip_radar`, migrations additives et rejouables.
 - `src/` : moteur de calcul, agent, adaptateur navigateur, adaptateur Gemini, API et stockage.
-- `config/` : modèles de source et de revue, volontairement incomplets et désactivés.
+- `config/` : modèles de source et de revue, plus le catalogue européen de 23 sources, toutes désactivées.
 - `docs/DATA_CONTRACT.md` : preuves requises et conventions de calcul.
 - `test/` : tests déterministes ; navigateur et modèle simulés, PostgreSQL local PGlite.
 - `reports/` : résultats de vérification du pack.
@@ -134,6 +147,7 @@ Importer les autres JSON sans les activer. Dans chaque nœud « Configuration »
 | 23 IMPORT DNID | Importe manuellement les adjudications officielles 2024 ; credential REVIEW requis |
 | 24 PLAN FAMILIES | Classe les familles historiques et prépare des missions ; transmission au Hunter bloquée par défaut |
 | 25 REVIEW | Enregistre des preuves réelles via le credential REVIEW ; garde-fou à compléter explicitement |
+| 26 REGISTER SOURCES | Enregistre le catalogue européen en attente ; n'active et ne consulte aucune source |
 | 30 DISPATCH ALERT | Réserve, envoie et confirme une alerte ; secret Telegram et destination à renseigner |
 
 Le workflow 20 répond rapidement `started`. Ce n'est pas encore une recherche terminée : consulter 21. `busy` indique qu'un travail est déjà en cours sur ce worker, `idle` qu'il n'y a plus de mission.

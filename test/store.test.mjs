@@ -34,6 +34,16 @@ test('PostgreSQL migration is rerunnable and preserves existing source',async()=
   const r=await db.query("SELECT count(*)::int AS n FROM pg_tables WHERE schemaname='flip_radar' AND rowsecurity=true");
   assert.equal(r.rows[0].n,12);
 });
+test('pending catalogue registration cannot disable an already approved source',async()=>{
+  const pending={id:'catalog_pending',label:'Pending source',enabled:false,status:'pending_policy_review',access_method:'browser_review_required',
+    policy_url:'https://pending.example/terms',countries:['FR'],currencies:['EUR']};
+  const attemptedReplacement={...source,enabled:false,status:'pending_policy_review'};
+  const result=await store.upsertPendingSources([pending,attemptedReplacement]);
+  assert.equal(result.registered,1);assert.equal(result.preserved_approved,1);
+  const rows=await store.sources();
+  assert.equal(rows.find(s=>s.id===source.id).enabled,true);
+  assert.equal(rows.find(s=>s.id===pending.id).enabled,false);
+});
 test('historical reference imports are idempotent, searchable and explicitly non-current',async()=>{
   const request=await store.createReferenceImport({request_key:'reference-import-one'});
   assert.equal(request.created,true);

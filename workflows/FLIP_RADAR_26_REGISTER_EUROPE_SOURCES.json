@@ -1,0 +1,182 @@
+{
+  "name": "FLIP RADAR 26 - ENREGISTRER CATALOGUE EUROPE",
+  "nodes": [
+    {
+      "id": "c034c1c5-2bab-470d-a406-03ccda04f83a",
+      "name": "A lire avant execution",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -290
+      ],
+      "parameters": {
+        "content": "## Catalogue europeen large, sans activation\nEnregistre des API officielles et des sites a examiner, tous desactives.\nLe credential REVIEW est obligatoire pour l import.\nAucune cle, navigation, annonce, mission, alerte ou achat pendant ce workflow.\nUne source ne pourra devenir active qu apres validation de son acces et de son adaptateur.",
+        "width": 640,
+        "height": 230
+      }
+    },
+    {
+      "id": "89a540d4-bbcc-4028-a05e-b58681b3f053",
+      "name": "Demarrage manuel",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b332c349-2d5e-410a-a18e-b6d8b0dcd689",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const worker_url='https://flip-radar-production-1c7c.up.railway.app';\nconst confirm_pending_only=true;\nif(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');\nif(confirm_pending_only!==true)throw new Error('CONFIRMATION_REQUIRED');\nreturn [{json:{worker_url:worker_url.replace(/\\/$/,''),confirm_pending_only}}];"
+      }
+    },
+    {
+      "id": "282dd4d7-de07-4382-af25-c2ac3644cc0b",
+      "name": "Enregistrer sources en attente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/sources/catalog/import' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({confirm_pending_only:$json.confirm_pending_only}) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Credential Header Auth FLIP_RADAR_REVIEW obligatoire. Ce noeud enregistre le catalogue fourni avec le worker, mais n active aucune source."
+    },
+    {
+      "id": "969c776d-4e98-4f89-a8f9-488966d385f1",
+      "name": "Lire matrice sources",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Configuration').first().json.worker_url + '/v1/sources' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Credential FLIP_RADAR_REVIEW ou FLIP_RADAR_WORKER. La reponse ne contient aucune valeur de secret."
+    },
+    {
+      "id": "0082eae6-a6ee-45b5-a8c9-46b5cb8dd8df",
+      "name": "Expliquer prochaine etape",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const x=$input.first().json;\nif(!Number.isInteger(x.registered)||!Array.isArray(x.sources))throw new Error('SOURCE_CATALOG_RESPONSE_INVALID');\nreturn [{json:{...x,status:'CATALOG_READY_SOURCES_STILL_DISABLED',browser_started:false,purchases_executed:0,\n  next_step:'Configurer et tester un adaptateur officiel prioritaire, puis approuver une seule source avant le premier LIVE.',\n  warning:'Le nombre de sources augmente la couverture, pas automatiquement le benefice. Deduplication, frais, transport, demande et risque restent obligatoires.'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Demarrage manuel": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Enregistrer sources en attente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enregistrer sources en attente": {
+      "main": [
+        [
+          {
+            "node": "Lire matrice sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire matrice sources": {
+      "main": [
+        [
+          {
+            "node": "Expliquer prochaine etape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "tags": []
+}

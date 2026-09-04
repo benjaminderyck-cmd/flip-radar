@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "files": [
     {
       "path": ".dockerignore",
@@ -20,6 +20,11 @@
       "path": "config/review.template.json",
       "bytes": 1279,
       "sha256": "f33f49891651151717664b37f454be95b56f8e9d2ad7eff630fba00668243552"
+    },
+    {
+      "path": "config/sources.europe.v1.json",
+      "bytes": 11530,
+      "sha256": "1d69bacf503c7251b2d3ea69263bbc9838f1c0b779b706fc28e73257748414ad"
     },
     {
       "path": "config/sources.example.json",
@@ -43,33 +48,33 @@
     },
     {
       "path": "FLIP_RADAR_DEMARRAGE_V1.md",
-      "bytes": 2501,
-      "sha256": "2790736ce4153ac9b0449c5f11523e244a24a3a0151c79b821fff40e12c74632"
+      "bytes": 2352,
+      "sha256": "fd60fa19b1077f0ecddadc75a729f4c8b873a459a4288217022cddcb41f416b8"
     },
     {
       "path": "package-lock.json",
       "bytes": 7564,
-      "sha256": "c4c3d782d7ff4bff9d2ed288ddbe72805e9d23f6590a8f995ed3c37b5b513ca0"
+      "sha256": "b86ba79a572efc6d29ca8614066596836cc4b783452bc03df173f28b60cd33b3"
     },
     {
       "path": "package.json",
       "bytes": 665,
-      "sha256": "1cf3fac38163c0bdeee4a52f19663b57a5a58726189080637953d7b3ecff126b"
+      "sha256": "ca4a23e07889c8812c402372c0525f0b4681bf399f0ced8453f85da5f1395b9d"
     },
     {
       "path": "README_FR.md",
-      "bytes": 17350,
-      "sha256": "593260d5a9b007f4e02f640eb17aa2e57fcccc3b08808c352e75f5d280c6348c"
+      "bytes": 19024,
+      "sha256": "8a81d99ca4c11c2389a0a1a4256d8472279cc8e662aa8b527ad4e20d270d6fbf"
     },
     {
       "path": "scripts/build-workflows.mjs",
-      "bytes": 21582,
-      "sha256": "9b98773334aced2a2290e0d34bbaba066eb01dc2c75ef187dbb1f6d569899623"
+      "bytes": 23627,
+      "sha256": "db908fdf317b42c60a732393c1a8343324e60985a7eb30052306bea5bffabcd7"
     },
     {
       "path": "scripts/check-package.mjs",
-      "bytes": 4983,
-      "sha256": "5adc4b0486c39bedc626590bb02207e21e5f4d350f410b3972c4e0f0cfcb8928"
+      "bytes": 5715,
+      "sha256": "06aec6f797ee9cbc97869f4e71dc9dee420cd0b70982273ad36c10e8ed86519a"
     },
     {
       "path": "scripts/import-dnid-sales.mjs",
@@ -124,7 +129,7 @@
     {
       "path": "src/playwright-browser.mjs",
       "bytes": 3986,
-      "sha256": "5492d0cdea01325486a58f5e6a1f69302b034a38468da87cdfe86ab9ac672260"
+      "sha256": "213b58a410b07957417c4a04991f3aaec8483674b2d9985d924df1229abd4e74"
     },
     {
       "path": "src/policy.mjs",
@@ -134,22 +139,27 @@
     {
       "path": "src/reference-data.mjs",
       "bytes": 8122,
-      "sha256": "43be9796a2ec7159df5d4716ae54191d4385651368e692595bc122ecce03edd6"
+      "sha256": "4a65b364f8ccef1dbfba6cc932a29796af3c48d1308cf003f99db634ed66cc1b"
     },
     {
       "path": "src/self-test.mjs",
       "bytes": 2791,
-      "sha256": "95d30c648d7eb4b11425dd11cac498661d84a8eb939d3fff2b1d1be3fcf7ff15"
+      "sha256": "d87ea7d93ae2fbb899f55157f20ed9081fc642761972eae894a5aa76dd0ce9ff"
     },
     {
       "path": "src/server.mjs",
-      "bytes": 10034,
-      "sha256": "f1377f4ab0f3f10850e540fcf573a0520c51f8a7efb69f870ddfab4a845450ca"
+      "bytes": 11293,
+      "sha256": "79183366a45c122263f9f7835747c25982d1a9e0214d76fbbe37493d364614c6"
+    },
+    {
+      "path": "src/source-catalog.mjs",
+      "bytes": 3060,
+      "sha256": "07b9db2cef916084eb62cbc9a5fddcb3c3caba792d5aca834f62bfb63ecd37ce"
     },
     {
       "path": "src/store.mjs",
-      "bytes": 19450,
-      "sha256": "b78950122029f27f2c2a89838b472a2c7ea9e194177620ae657fe8a2cc5d2813"
+      "bytes": 20334,
+      "sha256": "2a896a5f897cfbcb8503ea6a4ce1a36f40279876ebb9c8ced39c730b97914c5f"
     },
     {
       "path": "test/core.test.mjs",
@@ -183,23 +193,28 @@
     },
     {
       "path": "test/server.test.mjs",
-      "bytes": 6862,
-      "sha256": "ee296e00c121de21d30a9c16d9a26ef1d7fe9d6a1d5811f5fb6905d302145205"
+      "bytes": 8253,
+      "sha256": "b930f31b23a0dae19b033a1f3d3b6d1370cea77412b93962e6907857833e71c8"
+    },
+    {
+      "path": "test/source-catalog.test.mjs",
+      "bytes": 1588,
+      "sha256": "00142310934eb9b0d99db800bcf4a1b096ee620733875f302c760c2308a0e8df"
     },
     {
       "path": "test/store.test.mjs",
-      "bytes": 10802,
-      "sha256": "1db9761f593405a6c2492e45b9954f643276ec12b73a2b1ee1a8b3a52fadb9b4"
+      "bytes": 11536,
+      "sha256": "dd7813f1842f2689c8ea304653be4705c74eda8bb8b902055c92dbcac6b55b46"
     },
     {
       "path": "test/workflows.test.mjs",
-      "bytes": 7918,
-      "sha256": "16208d3fb5414bdd14344f6206e839d4e24e29e77c8b32b1ff11897356c49d3f"
+      "bytes": 8561,
+      "sha256": "ffd283da7ad350878881a112997350313b9b273d724cc77ddb2f00356b4b7272"
     },
     {
       "path": "workflows/FLIP_RADAR_00_SELF_TEST.json",
       "bytes": 21840,
-      "sha256": "9df390875b6aef24806340f413193018f82e28b7077c362e85d26787896eeaac"
+      "sha256": "5cfed0e4f6eeb56467a7c6a546794a8dee212e7574d9352398bea1377f5d5f4c"
     },
     {
       "path": "workflows/FLIP_RADAR_10_CREATE_MISSION.json",
@@ -229,12 +244,17 @@
     {
       "path": "workflows/FLIP_RADAR_24_PLAN_REFERENCE_FAMILIES.json",
       "bytes": 15909,
-      "sha256": "374216c2f7f208eba46d3c3b52a69855339c3e6d6a4936f8e549774dc6f4f1f8"
+      "sha256": "f2678a93b83499b2cc37080a230fc69f6f260c1ef35853f4d3c00969d9cc5810"
     },
     {
       "path": "workflows/FLIP_RADAR_25_REVIEW.json",
       "bytes": 4696,
       "sha256": "21117364f98d050569b652400d06f6ad71b5e79f998f4c0994b120327db28bb9"
+    },
+    {
+      "path": "workflows/FLIP_RADAR_26_REGISTER_EUROPE_SOURCES.json",
+      "bytes": 5692,
+      "sha256": "e6a504a02941ff77565d794186158063ba87cb2803e8b2dea66f3b2278a69047"
     },
     {
       "path": "workflows/FLIP_RADAR_30_DISPATCH_ALERT.json",

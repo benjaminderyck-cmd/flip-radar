@@ -92,7 +92,7 @@ if(status.live_enabled!==true)blockers.push('LIVE_DISABLED');
 if(status.model_configured!==true)blockers.push('MODEL_NOT_CONFIGURED');
 if(!(Number(status.approved_source_count)>0))blockers.push('NO_APPROVED_ACTIVE_SOURCE');
 const transmission_allowed=blockers.length===0&&status.hunter_ready===true;
-return [{json:{project:'FLIP RADAR',workflow_version:'0.3.0',status:transmission_allowed?'READY_TO_QUEUE':'PLAN_ONLY',
+return [{json:{project:'FLIP RADAR',workflow_version:'0.4.0',status:transmission_allowed?'READY_TO_QUEUE':'PLAN_ONLY',
   historical_only:true,eligible_as_current_market_proof:false,method:'deterministic_historical_research_priority_not_profit_or_demand',
   categories_considered:(categories.groups||[]).length,regulated_categories_excluded:true,
   mission_drafts,transmission_allowed,transmission_blockers:blockers,max_missions:config.max_missions,
@@ -191,6 +191,21 @@ if(!evidence.quotes.length||evidence.risk?.reviewed_by!=='human')throw new Error
 return [{json:{request_key:'n8n-review-'+$execution.id,listing_id:c.listing_id,...evidence}}];`,480),
     {...http('Enregistrer revue','/v1/reviews',{body:'={{ JSON.stringify($json) }}',x:720}),notes:'Credential Header Auth FLIP_RADAR_REVIEW obligatoire, distinct du WORKER. Les autres workflows ne doivent pas y avoir acces.'},
   ],'## Validation privee\nLe credential REVIEW est reserve a toi, pas au LLM.\nRenseigner frais, ventes confirmees, demande et risques avec leurs preuves.\nExemple de structure dans le pack. review_ready reste false par defaut.\nGO signifie candidat documente a examiner ; aucun achat execute.');
+  const sourceCatalog=workflow('FLIP RADAR 26 - ENREGISTRER CATALOGUE EUROPE',[
+    manual(),
+    code('Configuration',`const worker_url='https://flip-radar-production-1c7c.up.railway.app';
+const confirm_pending_only=true;
+if(!/^https:\\/\\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,63}(?::443)?\\/?$/i.test(worker_url))throw new Error('URL_WORKER_HTTPS_ORIGIN_REQUIRED');
+if(confirm_pending_only!==true)throw new Error('CONFIRMATION_REQUIRED');
+return [{json:{worker_url:worker_url.replace(/\\\/$/,''),confirm_pending_only}}];`,240),
+    {...http('Enregistrer sources en attente','/v1/sources/catalog/import',{body:'={{ JSON.stringify({confirm_pending_only:$json.confirm_pending_only}) }}',x:480}),notes:'Credential Header Auth FLIP_RADAR_REVIEW obligatoire. Ce noeud enregistre le catalogue fourni avec le worker, mais n active aucune source.'},
+    {...http('Lire matrice sources','/v1/sources',{method:'GET',x:720}),notes:'Credential FLIP_RADAR_REVIEW ou FLIP_RADAR_WORKER. La reponse ne contient aucune valeur de secret.'},
+    code('Expliquer prochaine etape',`const x=$input.first().json;
+if(!Number.isInteger(x.registered)||!Array.isArray(x.sources))throw new Error('SOURCE_CATALOG_RESPONSE_INVALID');
+return [{json:{...x,status:'CATALOG_READY_SOURCES_STILL_DISABLED',browser_started:false,purchases_executed:0,
+  next_step:'Configurer et tester un adaptateur officiel prioritaire, puis approuver une seule source avant le premier LIVE.',
+  warning:'Le nombre de sources augmente la couverture, pas automatiquement le benefice. Deduplication, frais, transport, demande et risque restent obligatoires.'}}];`,960),
+  ],'## Catalogue europeen large, sans activation\nEnregistre des API officielles et des sites a examiner, tous desactives.\nLe credential REVIEW est obligatoire pour l import.\nAucune cle, navigation, annonce, mission, alerte ou achat pendant ce workflow.\nUne source ne pourra devenir active qu apres validation de son acces et de son adaptateur.');
   const telegram=workflow('FLIP RADAR 30 - ENVOYER UNE ALERTE',[
     manual(),code('Configuration',CONFIG_CODE,240),
     code('Verifier destination',`const c=$input.first().json;if(!/^-?[0-9]+$/.test(c.chat_id))throw new Error('CONFIGURER_CHAT_TELEGRAM');return [{json:c}];`,480),
@@ -206,12 +221,13 @@ return [{json:{request_key:'n8n-review-'+$execution.id,listing_id:c.listing_id,.
     ['FLIP_RADAR_22_READ_CANDIDATES.json',listings],['FLIP_RADAR_23_IMPORT_DNID_REFERENCE.json',referenceImport],
     ['FLIP_RADAR_24_PLAN_REFERENCE_FAMILIES.json',referencePlanner],
     ['FLIP_RADAR_25_REVIEW.json',review],
+    ['FLIP_RADAR_26_REGISTER_EUROPE_SOURCES.json',sourceCatalog],
     ['FLIP_RADAR_30_DISPATCH_ALERT.json',telegram],
   ];
 }
 export async function writeWorkflows(){
   const dir=new URL('workflows/',root);await mkdir(dir,{recursive:true});
   for(const [name,workflow] of await buildWorkflows())await writeFile(new URL(name,dir),JSON.stringify(workflow,null,2)+'\n');
-  console.log('9 workflows generes, tous inactifs : '+fileURLToPath(dir));
+  console.log('10 workflows generes, tous inactifs : '+fileURLToPath(dir));
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await writeWorkflows();

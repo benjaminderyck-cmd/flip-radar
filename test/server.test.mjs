@@ -13,7 +13,7 @@ async function withServer(fn,overrides={},buildOverrides={}){
     referenceImport:async()=>null,
     createReferenceImport:async()=>({id:'12345678-1234-4123-a123-123456789abc',status:'queued',created:true}),
     startReferenceImport:async id=>({id,source_id:'dnid_sales_2024'}),
-    finishReferenceImport:async()=>({status:'completed'}),failReferenceImport:async()=>{},
+    finishReferenceImport:async()=>({status:'completed'}),failReferenceImport:async()=>{},upsertPendingSources:async sources=>({registered:sources.length,preserved_approved:0}),
     claimAlert:async()=>{throw new Error('SHOULD_NOT_CLAIM');},...overrides};
   const app=buildServer({store,config:loadConfig(env),...buildOverrides});
   await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
@@ -34,7 +34,7 @@ test('invalid live run limits are rejected',()=>{
   assert.throws(()=>loadConfig({...env,FLIP_RADAR_MAX_STEPS:'-1'}),/INVALID_RUN_LIMIT/);
 });
 test('public health reveals no private configuration',async()=>withServer(async({request})=>{
-  const r=await request('/health',{token:''});assert.equal(r.status,200);assert.equal(r.data.service,'flip-radar');assert.equal(r.data.version,'0.3.0');
+  const r=await request('/health',{token:''});assert.equal(r.status,200);assert.equal(r.data.service,'flip-radar');assert.equal(r.data.version,'0.4.0');
   assert.equal(JSON.stringify(r.data).includes('token'),false);
 }));
 test('private routes reject missing or wrong credentials',async()=>withServer(async({request})=>{
@@ -61,8 +61,22 @@ test('historical family endpoint is bounded and never labelled current evidence'
 test('status exposes readiness booleans but no model key',async()=>withServer(async({request})=>{
   const status=(await request('/v1/status')).data;
   assert.equal(status.approved_source_count,0);assert.equal(status.model_configured,false);
+  assert.equal(status.registered_source_count,0);assert.equal(status.pending_source_count,0);
   assert.equal(status.hunter_ready,false);assert.equal(JSON.stringify(status).includes('apiKey'),false);
 }));
+test('Europe source catalogue requires reviewer and remains pending-only',async()=>{
+  const pending={id:'fixture_api',label:'Fixture API',enabled:false,status:'pending_credentials',access_method:'official_api',
+    policy_url:'https://market.example/terms',countries:['FR','DE'],currencies:['EUR'],priority:90,credential_env:['FLIP_RADAR_FIXTURE_KEY']};
+  let stored=[];
+  await withServer(async({request})=>{
+    assert.equal((await request('/v1/sources/catalog/import',{body:{confirm_pending_only:true}})).status,403);
+    assert.equal((await request('/v1/sources/catalog/import',{body:{confirm_pending_only:false},token:env.FLIP_RADAR_REVIEW_TOKEN})).data.error,'SOURCE_CATALOG_CONFIRMATION_REQUIRED');
+    const imported=await request('/v1/sources/catalog/import',{body:{confirm_pending_only:true},token:env.FLIP_RADAR_REVIEW_TOKEN});
+    assert.equal(imported.status,200);assert.equal(imported.data.status,'CATALOG_REGISTERED_NOT_ENABLED');
+    assert.equal(imported.data.enabled,0);assert.equal(stored.length,1);
+  },{sources:async()=>stored,upsertPendingSources:async sources=>{stored=sources;return {registered:sources.length,preserved_approved:0};}},
+  {sourceCatalogLoader:async()=>[pending]});
+});
 test('only reviewer can start the official reference import',async()=>{
   let completed=false;
   await withServer(async({request,app})=>{

@@ -96,6 +96,14 @@ test('family planning workflow has a false branch that cannot create missions',(
   assert.equal(branches[1][0].node,'Plan seulement - garde fou');
   assert.match(wf.nodes.find(n=>n.name==='Configuration').parameters.jsCode,/transmit_to_hunter=false/);
 });
+test('Europe source catalogue workflow registers pending sources without live actions',()=>{
+  const wf=workflows.find(([name])=>name.includes('26_REGISTER'))[1];
+  assert.equal(wf.active,false);assert.equal(wf.nodes.some(n=>n.type==='n8n-nodes-base.scheduleTrigger'),false);
+  assert.match(wf.nodes.find(n=>n.name==='Enregistrer sources en attente').notes,/n active aucune source/);
+  assert.match(wf.nodes.find(n=>n.name==='Configuration').parameters.jsCode,/confirm_pending_only=true/);
+  assert.equal(JSON.stringify(wf).includes('FLIP_RADAR_LIVE_ENABLED=true'),false);
+  assert.equal(wf.nodes.some(n=>/telegram/i.test(n.type)),false);
+});
 test('Telegram gate blocks simulation and non-GO even if outbox is malformed',()=>{
   const globals=text=>({$input:{first:()=>({json:{status:'claimed',alert:{id:'one',claim_token:'two',text}}})},$:()=>({first:()=>({json:{chat_id:'123'}})})});
   assert.throws(()=>execute(ALERT_GATE_CODE,globals('[SIMULATION] FLIP RADAR — GO\nTest')),/SIMULATION_OR_NON_GO/);
